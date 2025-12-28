@@ -1,0 +1,304 @@
+.vendeur-auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-900);
+  padding: var(--space-6);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Éléments décoratifs animés */
+.vendeur-auth-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -30%;
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(circle, var(--vendeur-primary) 0%, transparent 60%);
+  opacity: 0.2;
+  animation: pulse 8s ease-in-out infinite;
+}
+
+.vendeur-auth-container::after {
+  content: '';
+  position: absolute;
+  bottom: -50%;
+  right: -30%;
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(circle, var(--vendeur-secondary) 0%, transparent 60%);
+  opacity: 0.15;
+  animation: pulse 10s ease-in-out infinite reverse;
+}
+
+.vendeur-auth-box {
+  background: white;
+  border-radius: var(--radius-3xl);
+  box-shadow: var(--shadow-2xl);
+  padding: var(--space-10);
+  width: 100%;
+  max-width: 460px;
+  animation: fadeInUp var(--transition-slower) ease-out;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.vendeur-auth-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.vendeur-logo {
+  width: 72px;
+  height: 72px;
+  background: var(--vendeur-gradient);
+  border-radius: var(--radius-2xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-5);
+  box-shadow: 0 10px 40px -10px rgba(14, 165, 233, 0.5);
+}
+
+.vendeur-logo .logo-icon {
+  width: 36px;
+  height: 36px;
+  color: white;
+}
+
+.vendeur-auth-header h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: var(--space-2);
+}
+
+.vendeur-auth-header p {
+  font-size: var(--text-base);
+  color: var(--gray-500);
+}
+
+.vendeur-auth-form {
+  margin-top: var(--space-8);
+}
+
+.vendeur-auth-form .form-group {
+  margin-bottom: var(--space-5);
+}
+
+.vendeur-auth-form .form-group label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+  color: var(--gray-700);
+  font-size: var(--text-sm);
+}
+
+.vendeur-auth-form .input-wrapper {
+  position: relative;
+}
+
+.vendeur-auth-form .input-icon {
+  position: absolute;
+  left: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--gray-400);
+}
+
+.vendeur-auth-form .form-group input {
+  width: 100%;
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-12);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+  font-size: var(--text-base);
+  transition: all var(--transition-base);
+  background: var(--gray-50);
+  box-sizing: border-box;
+  font-family: var(--font-sans);
+}
+
+.vendeur-auth-form .form-group input:focus {
+  outline: none;
+  border-color: var(--vendeur-primary);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+}
+
+.vendeur-auth-form .form-group input::placeholder {
+  color: var(--gray-400);
+}
+
+.vendeur-auth-form .form-group input:disabled {
+  background: var(--gray-100);
+  cursor: not-allowed;
+}
+
+.error-message {
+  background: var(--error-light);
+  color: var(--error-dark);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  animation: shake 0.5s ease-in-out;
+  border: 1px solid #fecaca;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.error-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.success-message {
+  background: var(--success-light);
+  color: var(--success-dark);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  border: 1px solid #bbf7d0;
+}
+
+.success-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.vendeur-auth-button {
+  width: 100%;
+  padding: var(--space-4);
+  background: var(--vendeur-gradient);
+  color: white;
+  border: none;
+  border-radius: var(--radius-xl);
+  font-size: var(--text-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  font-family: var(--font-sans);
+  box-shadow: var(--shadow-md), 0 10px 40px -10px rgba(14, 165, 233, 0.5);
+}
+
+.vendeur-auth-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg), 0 15px 50px -15px rgba(14, 165, 233, 0.6);
+}
+
+.vendeur-auth-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.vendeur-auth-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.vendeur-auth-button .spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: var(--radius-full);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vendeur-auth-footer {
+  text-align: center;
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--gray-100);
+}
+
+.vendeur-auth-footer p {
+  color: var(--gray-500);
+  font-size: var(--text-sm);
+  margin: var(--space-2) 0;
+}
+
+.vendeur-auth-footer a {
+  color: var(--vendeur-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.vendeur-auth-footer a:hover {
+  color: var(--vendeur-secondary);
+  text-decoration: underline;
+}
+
+.vendeur-auth-footer .admin-link {
+  margin-top: var(--space-4);
+}
+
+.vendeur-auth-footer .admin-link a {
+  color: var(--primary-600);
+}
+
+.vendeur-auth-footer .admin-link a:hover {
+  color: var(--primary-700);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .vendeur-auth-box {
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .vendeur-auth-header h1 {
+    font-size: var(--text-xl);
+  }
+
+  .vendeur-logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .vendeur-logo .logo-icon {
+    width: 30px;
+    height: 30px;
+  }
+}

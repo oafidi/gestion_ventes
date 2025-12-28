@@ -1,5 +1,7 @@
 package com.monsite.ventes.gestion_ventes.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,12 +20,14 @@ public class LigneCommande {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "commande_id", nullable = false)
     private Commande commande;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendeur_produit_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private VendeurProduit vendeurProduit;
 
     @Column(nullable = false)

@@ -21,13 +21,20 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authService.login(email, password);
-      const { token, user: userData } = response;
       
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
-      
-      return { success: true };
+      // Le backend renvoie directement les données utilisateur avec le token
+      if (response.success) {
+        const { token, id, nom, email: userEmail, telephone, role } = response;
+        const userData = { id, nom, email: userEmail, telephone, role };
+        
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+        
+        return { success: true };
+      } else {
+        return { success: false, message: response.message };
+      }
     } catch (error) {
       return { 
         success: false, 

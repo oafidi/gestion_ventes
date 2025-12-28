@@ -1,5 +1,6 @@
 package com.monsite.ventes.gestion_ventes.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,6 +26,7 @@ public class Categorie {
     @Column
     private String image;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "categorie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Produit> produits = new ArrayList<>();
 }

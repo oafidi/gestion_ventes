@@ -1,6 +1,7 @@
 package com.monsite.ventes.gestion_ventes.service;
 
 import com.monsite.ventes.gestion_ventes.dto.MessageResponse;
+import com.monsite.ventes.gestion_ventes.dto.VendeurProduitResponse;
 import com.monsite.ventes.gestion_ventes.entity.Categorie;
 import com.monsite.ventes.gestion_ventes.entity.Produit;
 import com.monsite.ventes.gestion_ventes.entity.Vendeur;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminService {
@@ -45,6 +47,10 @@ public class AdminService {
         return vendeurRepository.findByEstApprouve(true);
     }
 
+    public List<Vendeur> getAllVendeurs() {
+        return vendeurRepository.findAll();
+    }
+
     @Transactional
     public MessageResponse approuverVendeur(Long vendeurId) {
         Vendeur vendeur = vendeurRepository.findById(vendeurId)
@@ -63,6 +69,32 @@ public class AdminService {
         return MessageResponse.builder()
                 .success(true)
                 .message("Vendeur " + vendeur.getNom() + " approuvé avec succès")
+                .build();
+    }
+
+    @Transactional
+    public MessageResponse bannirVendeur(Long vendeurId) {
+        Vendeur vendeur = vendeurRepository.findById(vendeurId)
+                .orElse(null);
+
+        if (vendeur == null) {
+            return MessageResponse.builder()
+                    .success(false)
+                    .message("Vendeur non trouvé")
+                    .build();
+        }
+
+        vendeur.setEstApprouve(false);
+        vendeurRepository.save(vendeur);
+
+        // Désapprouver toutes ses inscriptions produits
+        List<VendeurProduit> inscriptions = vendeurProduitRepository.findByVendeurId(vendeurId);
+        inscriptions.forEach(vp -> vp.setEstApprouve(false));
+        vendeurProduitRepository.saveAll(inscriptions);
+
+        return MessageResponse.builder()
+                .success(true)
+                .message("Vendeur " + vendeur.getNom() + " banni avec succès")
                 .build();
     }
 
@@ -90,6 +122,30 @@ public class AdminService {
 
     public List<VendeurProduit> getVendeurProduitsEnAttente() {
         return vendeurProduitRepository.findByEstApprouve(false);
+    }
+
+    public List<VendeurProduitResponse> getVendeurProduitsEnAttenteDTO() {
+        return vendeurProduitRepository.findByEstApprouve(false).stream()
+                .map(this::mapToVendeurProduitResponse)
+                .collect(Collectors.toList());
+    }
+
+    private VendeurProduitResponse mapToVendeurProduitResponse(VendeurProduit vp) {
+        return VendeurProduitResponse.builder()
+                .id(vp.getId())
+                .vendeurId(vp.getVendeur().getId())
+                .vendeurNom(vp.getVendeur().getNom())
+                .produitId(vp.getProduit().getId())
+                .produitNom(vp.getProduit().getNom())
+                .prixOriginal(vp.getProduit().getPrix())
+                .prixVendeur(vp.getPrixVendeur())
+                .image(vp.getImage() != null ? vp.getImage() : vp.getProduit().getImage())
+                .description(vp.getDescription())
+                .titre(vp.getTitre())
+                .estApprouve(vp.isEstApprouve())
+                .categorieNom(vp.getProduit().getCategorie() != null ? vp.getProduit().getCategorie().getNom() : null)
+                .quantiteStock(vp.getProduit().getQuantite())
+                .build();
     }
 
     @Transactional
@@ -131,6 +187,39 @@ public class AdminService {
                 .success(true)
                 .message("Inscription du vendeur pour le produit rejetée")
                 .build();
+    }
+
+    @Transactional
+    public MessageResponse bannirVendeurProduit(Long vendeurProduitId) {
+        VendeurProduit vendeurProduit = vendeurProduitRepository.findById(vendeurProduitId)
+                .orElse(null);
+
+        if (vendeurProduit == null) {
+            return MessageResponse.builder()
+                    .success(false)
+                    .message("Inscription vendeur-produit non trouvée")
+                    .build();
+        }
+
+        vendeurProduit.setEstApprouve(false);
+        vendeurProduitRepository.save(vendeurProduit);
+
+        return MessageResponse.builder()
+                .success(true)
+                .message("Inscription du vendeur pour le produit bannie")
+                .build();
+    }
+
+    public List<VendeurProduitResponse> getAllVendeurProduitsDTO() {
+        return vendeurProduitRepository.findAll().stream()
+                .map(this::mapToVendeurProduitResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<VendeurProduitResponse> getVendeurProduitsApprouvesDTO() {
+        return vendeurProduitRepository.findByEstApprouve(true).stream()
+                .map(this::mapToVendeurProduitResponse)
+                .collect(Collectors.toList());
     }
 
     // ========== Gestion des Catégories ==========

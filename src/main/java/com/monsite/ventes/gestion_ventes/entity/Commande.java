@@ -1,5 +1,7 @@
 package com.monsite.ventes.gestion_ventes.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,6 +25,7 @@ public class Commande {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
+    @JsonIgnoreProperties({"commandes", "avis", "hibernateLazyInitializer", "handler", "motDePasse", "authorities", "accountNonExpired", "accountNonLocked", "credentialsNonExpired"})
     private Client client;
 
     @Column(nullable = false)
@@ -35,7 +38,8 @@ public class Commande {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal montantTotal;
 
-    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<LigneCommande> lignesCommande = new ArrayList<>();
 
     public enum StatutCommande {

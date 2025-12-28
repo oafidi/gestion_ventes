@@ -1,0 +1,300 @@
+/* 
+ * Design System - Variables CSS globales
+ * Palette de couleurs moderne et cohérente pour toute l'application
+ */
+
+:root {
+  /* === COULEURS PRINCIPALES (Bleu professionnel) === */
+  --primary-50: #eff6ff;
+  --primary-100: #dbeafe;
+  --primary-200: #bfdbfe;
+  --primary-300: #93c5fd;
+  --primary-400: #60a5fa;
+  --primary-500: #3b82f6;
+  --primary-600: #2563eb;
+  --primary-700: #1d4ed8;
+  --primary-800: #1e40af;
+  --primary-900: #1e3a8a;
+
+  /* === COULEURS ACCENT (Turquoise/Cyan) === */
+  --accent-50: #ecfeff;
+  --accent-100: #cffafe;
+  --accent-200: #a5f3fc;
+  --accent-300: #67e8f9;
+  --accent-400: #22d3ee;
+  --accent-500: #06b6d4;
+  --accent-600: #0891b2;
+  --accent-700: #0e7490;
+
+  /* === COULEURS VENDEUR (Gradient Cyan/Blue) === */
+  --vendeur-primary: #0ea5e9;
+  --vendeur-secondary: #06b6d4;
+  --vendeur-gradient: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+  --vendeur-gradient-dark: linear-gradient(135deg, #0369a1 0%, #0e7490 100%);
+
+  /* === COULEURS SUCCÈS (Vert) === */
+  --success-50: #f0fdf4;
+  --success-100: #dcfce7;
+  --success-200: #bbf7d0;
+  --success-300: #86efac;
+  --success-400: #4ade80;
+  --success-500: #22c55e;
+  --success-600: #16a34a;
+  --success-700: #15803d;
+
+  /* === COULEURS NEUTRES === */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  /* === COULEURS SÉMANTIQUES === */
+  --success-light: #d1fae5;
+  --success: #10b981;
+  --success-dark: #059669;
+  
+  --warning-light: #fef3c7;
+  --warning: #f59e0b;
+  --warning-dark: #d97706;
+  
+  --error-light: #fee2e2;
+  --error: #ef4444;
+  --error-dark: #dc2626;
+  
+  --info-light: #e0e7ff;
+  --info: #6366f1;
+  --info-dark: #4f46e5;
+
+  /* === GRADIENTS === */
+  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  --gradient-primary-dark: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  --gradient-accent: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  --gradient-hero: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
+  --gradient-dark: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+  --gradient-card: linear-gradient(145deg, #ffffff 0%, #f9fafb 100%);
+
+  /* === OMBRES === */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-primary: 0 10px 40px -10px rgba(59, 130, 246, 0.5);
+  --shadow-accent: 0 10px 40px -10px rgba(34, 197, 94, 0.5);
+
+  /* === TYPOGRAPHIE === */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Poppins', var(--font-sans);
+  
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
+  /* === SPACING === */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* === BORDER RADIUS === */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* === TRANSITIONS === */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+  --transition-slower: 500ms ease;
+
+  /* === Z-INDEX === */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 300;
+  --z-tooltip: 400;
+  --z-toast: 500;
+}
+
+/* === RESET & BASE === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--gray-800);
+  background-color: var(--gray-50);
+}
+
+/* === UTILITIES === */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.section {
+  padding: var(--space-20) 0;
+}
+
+.text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* === ANIMATIONS === */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-5%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+.animate-fadeIn { animation: fadeIn var(--transition-slow) ease-out; }
+.animate-fadeInUp { animation: fadeInUp var(--transition-slow) ease-out; }
+.animate-fadeInDown { animation: fadeInDown var(--transition-slow) ease-out; }
+.animate-scaleIn { animation: scaleIn var(--transition-slow) ease-out; }
+.animate-slideInRight { animation: slideInRight var(--transition-slow) ease-out; }
+.animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.animate-spin { animation: spin 1s linear infinite; }
+.animate-bounce { animation: bounce 1s infinite; }
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
+}
+
+/* === SELECTION === */
+::selection {
+  background: var(--primary-200);
+  color: var(--primary-900);
+}
+
+/* === FOCUS === */
+:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap');

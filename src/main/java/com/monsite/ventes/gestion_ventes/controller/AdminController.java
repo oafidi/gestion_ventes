@@ -1,11 +1,15 @@
 package com.monsite.ventes.gestion_ventes.controller;
 
+import com.monsite.ventes.gestion_ventes.dto.CommandeResponse;
 import com.monsite.ventes.gestion_ventes.dto.MessageResponse;
+import com.monsite.ventes.gestion_ventes.dto.VendeurProduitResponse;
 import com.monsite.ventes.gestion_ventes.entity.Categorie;
+import com.monsite.ventes.gestion_ventes.entity.Commande;
 import com.monsite.ventes.gestion_ventes.entity.Produit;
 import com.monsite.ventes.gestion_ventes.entity.Vendeur;
 import com.monsite.ventes.gestion_ventes.entity.VendeurProduit;
 import com.monsite.ventes.gestion_ventes.service.AdminService;
+import com.monsite.ventes.gestion_ventes.service.CommandeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +23,19 @@ import java.util.Map;
 public class AdminController {
 
     private final AdminService adminService;
+    private final CommandeService commandeService;
 
-    public AdminController(AdminService adminService) {
+    public AdminController(AdminService adminService, CommandeService commandeService) {
         this.adminService = adminService;
+        this.commandeService = commandeService;
     }
 
     // ========== Gestion des Vendeurs ==========
+
+    @GetMapping("/vendeurs")
+    public ResponseEntity<List<Vendeur>> getAllVendeurs() {
+        return ResponseEntity.ok(adminService.getAllVendeurs());
+    }
 
     @GetMapping("/vendeurs/en-attente")
     public ResponseEntity<List<Vendeur>> getVendeursEnAttente() {
@@ -45,6 +56,15 @@ public class AdminController {
         return ResponseEntity.badRequest().body(response);
     }
 
+    @PostMapping("/vendeurs/{id}/bannir")
+    public ResponseEntity<MessageResponse> bannirVendeur(@PathVariable Long id) {
+        MessageResponse response = adminService.bannirVendeur(id);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.badRequest().body(response);
+    }
+
     @DeleteMapping("/vendeurs/{id}/rejeter")
     public ResponseEntity<MessageResponse> rejeterVendeur(@PathVariable Long id) {
         MessageResponse response = adminService.rejeterVendeur(id);
@@ -56,14 +76,33 @@ public class AdminController {
 
     // ========== Gestion des VendeurProduits ==========
 
+    @GetMapping("/vendeur-produits")
+    public ResponseEntity<List<VendeurProduitResponse>> getAllVendeurProduits() {
+        return ResponseEntity.ok(adminService.getAllVendeurProduitsDTO());
+    }
+
     @GetMapping("/vendeur-produits/en-attente")
-    public ResponseEntity<List<VendeurProduit>> getVendeurProduitsEnAttente() {
-        return ResponseEntity.ok(adminService.getVendeurProduitsEnAttente());
+    public ResponseEntity<List<VendeurProduitResponse>> getVendeurProduitsEnAttente() {
+        return ResponseEntity.ok(adminService.getVendeurProduitsEnAttenteDTO());
+    }
+
+    @GetMapping("/vendeur-produits/approuves")
+    public ResponseEntity<List<VendeurProduitResponse>> getVendeurProduitsApprouves() {
+        return ResponseEntity.ok(adminService.getVendeurProduitsApprouvesDTO());
     }
 
     @PostMapping("/vendeur-produits/{id}/approuver")
     public ResponseEntity<MessageResponse> approuverVendeurProduit(@PathVariable Long id) {
         MessageResponse response = adminService.approuverVendeurProduit(id);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @PostMapping("/vendeur-produits/{id}/bannir")
+    public ResponseEntity<MessageResponse> bannirVendeurProduit(@PathVariable Long id) {
+        MessageResponse response = adminService.bannirVendeurProduit(id);
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
         }
@@ -132,6 +171,54 @@ public class AdminController {
     public ResponseEntity<Void> deleteProduit(@PathVariable Long id) {
         adminService.deleteProduit(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // ========== Gestion des Commandes ==========
+
+    @GetMapping("/commandes")
+    public ResponseEntity<List<CommandeResponse>> getAllCommandes(
+            @RequestParam(required = false) Long vendeurId,
+            @RequestParam(required = false) Long produitId,
+            @RequestParam(required = false) String statut) {
+        List<CommandeResponse> commandes = commandeService.getAllCommandesFiltered(vendeurId, produitId, statut);
+        return ResponseEntity.ok(commandes);
+    }
+
+    @GetMapping("/commandes/{id}")
+    public ResponseEntity<CommandeResponse> getCommandeById(@PathVariable Long id) {
+        CommandeResponse commande = commandeService.getCommandeByIdAdmin(id);
+        return ResponseEntity.ok(commande);
+    }
+
+    @PutMapping("/commandes/{id}/statut")
+    public ResponseEntity<MessageResponse> updateStatutCommande(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request) {
+        String nouveauStatut = request.get("statut");
+        if (nouveauStatut == null || nouveauStatut.isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                MessageResponse.builder()
+                    .success(false)
+                    .message("Le statut est obligatoire")
+                    .build()
+            );
+        }
+        
+        try {
+            Commande.StatutCommande statut = Commande.StatutCommande.valueOf(nouveauStatut);
+            MessageResponse response = commandeService.updateStatutCommande(id, statut);
+            if (response.isSuccess()) {
+                return ResponseEntity.ok(response);
+            }
+            return ResponseEntity.badRequest().body(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(
+                MessageResponse.builder()
+                    .success(false)
+                    .message("Statut invalide: " + nouveauStatut)
+                    .build()
+            );
+        }
     }
 
     // ========== Statistiques ==========

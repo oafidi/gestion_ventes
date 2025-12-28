@@ -1,5 +1,7 @@
 package com.monsite.ventes.gestion_ventes.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,8 +43,10 @@ public class Produit {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categorie_id")
+    @JsonIgnoreProperties({"produits", "hibernateLazyInitializer", "handler"})
     private Categorie categorie;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "produit", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<VendeurProduit> vendeurProduits = new ArrayList<>();
 }

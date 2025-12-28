@@ -31,3 +31,22 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Node ###
+node_modules/
+frontend/node_modules/
+bin/frontend/node_modules/
+**/node_modules/
+
+### Bin folder ###
+bin/
+
+### Uploads ###
+uploads/
+
+### Logs ###
+*.log
+npm-debug.log*
+
+### Package lock ###
+frontend/package-lock.json

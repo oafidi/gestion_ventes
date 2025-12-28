@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const PrivateRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
 
   if (loading) {
     return (
@@ -14,7 +14,16 @@ const PrivateRoute = ({ children }) => {
     );
   }
 
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+  // Vérifier l'authentification et le rôle ADMIN
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user?.role !== 'ADMIN') {
+    return <Navigate to="/vendeur/login" replace />;
+  }
+
+  return children;
 };
 
 export default PrivateRoute;

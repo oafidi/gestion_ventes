@@ -25,12 +25,12 @@ api.interceptors.request.use(
 
 const authService = {
   login: async (email, password) => {
-    const response = await api.post('/login', { email, password });
+    const response = await api.post('/login', { email, motDePasse: password });
     return response.data;
   },
 
   register: async (userData) => {
-    const response = await api.post('/register', userData);
+    const response = await api.post('/signup', userData);
     return response.data;
   },
 

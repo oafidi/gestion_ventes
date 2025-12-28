@@ -19,6 +19,7 @@ public class AuthResponse {
     private Role role;
     private String message;
     private boolean success;
+    private String token;
 
     // Pour les vendeurs
     private Boolean estApprouve;

@@ -57,6 +57,9 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        System.out.println("########## CONFIGURING SECURITY FILTER CHAIN ##########");
+        System.out.println("JWT Filter instance: " + jwtAuthenticationFilter);
+        
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
@@ -64,9 +67,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Routes publiques
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/produits/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/vendeur-produits/approuves").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/avis/produit/**").permitAll()
                         
                         // Routes Admin uniquement
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -90,8 +95,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:4200", "http://localhost:5173"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 

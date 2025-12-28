@@ -1,5 +1,6 @@
 package com.monsite.ventes.gestion_ventes.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,9 +21,11 @@ public class Client extends Utilisateur {
     @Column(nullable = false)
     private String adresseLivraison;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Commande> commandes = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Avis> avis = new ArrayList<>();
 

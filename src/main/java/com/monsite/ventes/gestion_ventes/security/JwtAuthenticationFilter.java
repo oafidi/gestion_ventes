@@ -29,26 +29,52 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public JwtAuthenticationFilter(JwtTokenProvider tokenProvider, CustomUserDetailsService userDetailsService) {
         this.tokenProvider = tokenProvider;
         this.userDetailsService = userDetailsService;
+        System.out.println("########## JwtAuthenticationFilter INITIALIZED ##########");
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        
+        System.out.println("########## JWT FILTER CALLED ##########");
+        System.out.println("Request URI: " + request.getRequestURI());
+        System.out.println("Request Method: " + request.getMethod());
+        
         try {
             String jwt = getJwtFromRequest(request);
+            String requestURI = request.getRequestURI();
+            
+            System.out.println("=== JWT Filter === URI: " + requestURI);
+            System.out.println("JWT Token présent: " + (jwt != null ? "OUI (longueur: " + jwt.length() + ")" : "NON"));
+            System.out.println("Authorization Header: " + request.getHeader("Authorization"));
 
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-                String email = tokenProvider.getEmailFromToken(jwt);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            if (StringUtils.hasText(jwt)) {
+                System.out.println("Token reçu: " + jwt.substring(0, Math.min(50, jwt.length())) + "...");
+                
+                boolean isValid = tokenProvider.validateToken(jwt);
+                System.out.println("Token valide: " + isValid);
+                
+                if (isValid) {
+                    String email = tokenProvider.getEmailFromToken(jwt);
+                    System.out.println("Email extrait du token: " + email);
+                    
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                    System.out.println("UserDetails chargé: " + userDetails.getUsername());
+                    System.out.println("Authorities: " + userDetails.getAuthorities());
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    System.out.println("Authentification définie dans le contexte de sécurité");
+                }
+            } else {
+                System.out.println("Aucun token JWT trouvé dans la requête");
             }
         } catch (Exception ex) {
-            logger.error("Could not set user authentication in security context", ex);
+            System.out.println("ERREUR dans JWT Filter: " + ex.getMessage());
+            ex.printStackTrace();
         }
 
         filterChain.doFilter(request, response);

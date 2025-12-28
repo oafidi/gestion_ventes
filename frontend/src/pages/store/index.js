@@ -1,0 +1,9 @@
+export { default as StoreHome } from './StoreHome';
+export { default as StoreShop } from './StoreShop';
+export { default as StoreProduct } from './StoreProduct';
+export { default as StoreCheckout } from './StoreCheckout';
+export { default as StoreOrderSuccess } from './StoreOrderSuccess';
+export { default as StoreLogin } from './StoreLogin';
+export { default as StoreAccount } from './StoreAccount';
+export { default as StoreContact } from './StoreContact';
+export { StoreHeader, StoreFooter, CartSidebar } from './StoreHome';

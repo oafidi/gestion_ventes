@@ -12,6 +12,7 @@ import com.monsite.ventes.gestion_ventes.repository.VendeurRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,6 +96,74 @@ public class VendeurProduitService {
                 .build();
     }
 
+    @Transactional
+    public MessageResponse modifierVendeurProduit(Long vendeurId, Long vendeurProduitId, 
+                                                   BigDecimal prixVendeur, String titre, 
+                                                   String description, String imagePath) {
+        // Vérifier si le vendeur existe
+        Vendeur vendeur = vendeurRepository.findById(vendeurId).orElse(null);
+        if (vendeur == null) {
+            return MessageResponse.builder()
+                    .success(false)
+                    .message("Vendeur non trouvé")
+                    .build();
+        }
+
+        // Vérifier si le vendeur produit existe
+        VendeurProduit vendeurProduit = vendeurProduitRepository.findById(vendeurProduitId).orElse(null);
+        if (vendeurProduit == null) {
+            return MessageResponse.builder()
+                    .success(false)
+                    .message("Produit vendeur non trouvé")
+                    .build();
+        }
+
+        // Vérifier que ce produit appartient bien au vendeur
+        if (!vendeurProduit.getVendeur().getId().equals(vendeurId)) {
+            return MessageResponse.builder()
+                    .success(false)
+                    .message("Vous n'êtes pas autorisé à modifier ce produit")
+                    .build();
+        }
+
+        // Vérifier que le prix vendeur est supérieur au prix original
+        if (prixVendeur.compareTo(vendeurProduit.getProduit().getPrix()) <= 0) {
+            return MessageResponse.builder()
+                    .success(false)
+                    .message("Le prix vendeur doit être supérieur au prix original (" + 
+                            vendeurProduit.getProduit().getPrix() + ")")
+                    .build();
+        }
+
+        // Mettre à jour les champs
+        vendeurProduit.setPrixVendeur(prixVendeur);
+        vendeurProduit.setTitre(titre);
+        vendeurProduit.setDescription(description);
+        
+        // Mettre à jour l'image si fournie
+        if (imagePath != null && !imagePath.isEmpty()) {
+            vendeurProduit.setImage(imagePath);
+        }
+
+        // Remettre en attente d'approbation
+        vendeurProduit.setEstApprouve(false);
+
+        vendeurProduitRepository.save(vendeurProduit);
+
+        return MessageResponse.builder()
+                .success(true)
+                .message("Produit modifié avec succès. En attente d'approbation par l'administrateur.")
+                .build();
+    }
+
+    public VendeurProduitResponse getVendeurProduitById(Long vendeurId, Long vendeurProduitId) {
+        VendeurProduit vp = vendeurProduitRepository.findById(vendeurProduitId).orElse(null);
+        if (vp == null || !vp.getVendeur().getId().equals(vendeurId)) {
+            return null;
+        }
+        return mapToResponse(vp);
+    }
+
     public List<VendeurProduitResponse> getMesProduits(Long vendeurId) {
         return vendeurProduitRepository.findByVendeurId(vendeurId).stream()
                 .map(this::mapToResponse)
@@ -126,7 +195,9 @@ public class VendeurProduitService {
                 .description(vp.getDescription())
                 .titre(vp.getTitre())
                 .estApprouve(vp.isEstApprouve())
+                .categorieId(vp.getProduit().getCategorie() != null ? vp.getProduit().getCategorie().getId() : null)
                 .categorieNom(vp.getProduit().getCategorie() != null ? vp.getProduit().getCategorie().getNom() : null)
+                .quantiteStock(vp.getProduit().getQuantite())
                 .build();
     }
 }

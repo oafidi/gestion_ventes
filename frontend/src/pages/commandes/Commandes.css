@@ -1,0 +1,358 @@
+.commandes-container {
+  padding: 20px;
+}
+
+.commandes-header {
+  margin-bottom: 30px;
+}
+
+.commandes-header h1 {
+  margin: 0 0 5px 0;
+  color: #333;
+}
+
+.commandes-header .subtitle {
+  color: #666;
+  margin: 0;
+}
+
+/* Alertes */
+.alert {
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.alert .close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* Section Filtres */
+.filtres-section {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+}
+
+.filtres-section h3 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.filtres-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.filtre-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filtre-group label {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.filtre-group select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+}
+
+.btn-reset {
+  padding: 10px 20px;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-reset:hover {
+  background: #5a6268;
+}
+
+/* Liste des commandes */
+.commandes-list {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.commandes-count {
+  padding: 15px 20px;
+  background: #f8f9fa;
+  font-size: 14px;
+  color: #666;
+  border-bottom: 1px solid #eee;
+}
+
+.no-commandes {
+  padding: 60px 20px;
+  text-align: center;
+  color: #999;
+}
+
+/* Table */
+.commandes-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.commandes-table th {
+  background: #f8f9fa;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
+  text-transform: uppercase;
+  border-bottom: 2px solid #eee;
+}
+
+.commandes-table td {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+
+.commandes-table tr:hover {
+  background: #f8f9fa;
+}
+
+.commande-id {
+  font-weight: 600;
+  color: #007bff;
+}
+
+.client-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.client-info strong {
+  color: #333;
+}
+
+.client-info small {
+  color: #999;
+  font-size: 12px;
+}
+
+.produits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.produit-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  font-size: 13px;
+}
+
+.produit-item .quantite {
+  background: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.produit-item .vendeur {
+  width: 100%;
+  color: #999;
+  font-size: 11px;
+}
+
+.montant {
+  font-weight: 600;
+  color: #28a745;
+  white-space: nowrap;
+}
+
+/* Badge statut */
+.statut-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Boutons */
+.btn-modifier {
+  padding: 8px 15px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.2s;
+}
+
+.btn-modifier:hover {
+  background: #0056b3;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 450px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+}
+
+.modal-content h2 {
+  margin: 0 0 5px 0;
+  color: #333;
+}
+
+.modal-subtitle {
+  color: #666;
+  margin: 0 0 20px 0;
+}
+
+.modal-info {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.modal-info p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.modal-form {
+  margin-bottom: 25px;
+}
+
+.modal-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.statut-select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-cancel {
+  padding: 12px 24px;
+  background: #f8f9fa;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-confirm {
+  padding: 12px 24px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loading {
+  padding: 60px;
+  text-align: center;
+  color: #666;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .filtres-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .filtres-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .commandes-table {
+    display: block;
+    overflow-x: auto;
+  }
+}

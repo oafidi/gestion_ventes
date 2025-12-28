@@ -102,7 +102,13 @@ public class AuthService {
                 client.setRole(Role.CLIENT);
                 client.setAdresseLivraison(request.getAdresseLivraison() != null ? request.getAdresseLivraison() : "");
                 clientRepository.save(client);
-                return buildAuthResponse(client, "Client créé avec succès");
+                
+                // Générer un token JWT pour le client après inscription
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                        client, null, client.getAuthorities());
+                String jwt = tokenProvider.generateToken(authentication);
+                
+                return buildAuthResponseWithToken(client, jwt, "Client créé avec succès");
         }
     }
 
@@ -140,7 +146,7 @@ public class AuthService {
             String jwt = tokenProvider.generateToken(authentication);
             cookieUtil.createJwtCookie(response, jwt);
 
-            return buildAuthResponse(utilisateur, "Connexion réussie");
+            return buildAuthResponseWithToken(utilisateur, jwt, "Connexion réussie");
 
         } catch (Exception e) {
             return AuthResponse.builder()
@@ -156,6 +162,10 @@ public class AuthService {
     }
 
     private AuthResponse buildAuthResponse(Utilisateur utilisateur, String message) {
+        return buildAuthResponseWithToken(utilisateur, null, message);
+    }
+
+    private AuthResponse buildAuthResponseWithToken(Utilisateur utilisateur, String token, String message) {
         AuthResponse.AuthResponseBuilder builder = AuthResponse.builder()
                 .id(utilisateur.getId())
                 .nom(utilisateur.getNom())
@@ -163,7 +173,8 @@ public class AuthService {
                 .telephone(utilisateur.getTelephone())
                 .role(utilisateur.getRole())
                 .success(true)
-                .message(message);
+                .message(message)
+                .token(token);
 
         if (utilisateur instanceof Vendeur vendeur) {
             builder.estApprouve(vendeur.isEstApprouve());

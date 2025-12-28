@@ -24,5 +24,7 @@ public class VendeurProduitResponse {
     private String description;
     private String titre;
     private boolean estApprouve;
+    private Long categorieId;
     private String categorieNom;
+    private Integer quantiteStock;
 }

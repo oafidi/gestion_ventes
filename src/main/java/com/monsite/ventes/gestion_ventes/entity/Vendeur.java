@@ -1,5 +1,6 @@
 package com.monsite.ventes.gestion_ventes.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class Vendeur extends Utilisateur {
     @Column(nullable = false)
     private boolean estApprouve = false;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "vendeur", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<VendeurProduit> vendeurProduits = new ArrayList<>();
 

@@ -1,0 +1,183 @@
+@startuml Diagramme de Classes - Gestion Ventes
+
+title Diagramme de Classes - Système de Gestion des Ventes
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' =====================
+' ÉNUMÉRATIONS
+' =====================
+enum Role {
+    ADMIN
+    VENDEUR
+    CLIENT
+}
+
+enum StatutCommande {
+    EN_ATTENTE
+    CONFIRMEE
+    EN_COURS_LIVRAISON
+    LIVREE
+    ANNULEE
+}
+
+' =====================
+' CLASSES
+' =====================
+
+abstract class Utilisateur {
+    - id : Long
+    - nom : String
+    - email : String
+    - motDePasse : String
+    - telephone : String
+    - role : Role
+    --
+    + seConnecter() : boolean
+    + seDeconnecter() : void
+    + modifierProfil() : void
+}
+
+class Admin {
+    --
+    + approuverVendeur(v: Vendeur) : void
+    + rejeterVendeur(v: Vendeur) : void
+    + ajouterCategorie(c: Categorie) : void
+    + modifierCategorie(c: Categorie) : void
+    + supprimerCategorie(c: Categorie) : void
+    + ajouterProduit(p: Produit) : void
+    + modifierProduit(p: Produit) : void
+    + supprimerProduit(p: Produit) : void
+    + modifierStock(p: Produit, qte: Integer) : void
+    + approuverInscription(vp: VendeurProduit) : void
+    + rejeterInscription(vp: VendeurProduit) : void
+    + changerStatutCommande(c: Commande, s: StatutCommande) : void
+    + consulterStatistiques() : void
+}
+
+class Client {
+    - adresseLivraison : String
+    --
+    + passerCommande(panier: List<LigneCommande>) : Commande
+    + consulterMesCommandes() : List<Commande>
+    + ajouterAvis(vp: VendeurProduit, note: Integer, commentaire: String) : Avis
+    + consulterCatalogue() : List<VendeurProduit>
+}
+
+class Vendeur {
+    - estApprouve : boolean
+    --
+    + inscrireProduit(p: Produit, prix: BigDecimal) : VendeurProduit
+    + modifierInscription(vp: VendeurProduit) : void
+    + supprimerInscription(vp: VendeurProduit) : void
+    + consulterMesProduits() : List<VendeurProduit>
+    + consulterMesAvis() : List<Avis>
+    + masquerAvis(a: Avis) : void
+}
+
+class Categorie {
+    - id : Long
+    - nom : String
+    - image : String
+    --
+    + getProduits() : List<Produit>
+}
+
+class Produit {
+    - id : Long
+    - nom : String
+    - description : String
+    - prix : BigDecimal
+    - quantite : Integer
+    - image : String
+    - dateDernierStock : LocalDate
+    --
+    + estDisponible() : boolean
+    + decrementerStock(qte: Integer) : void
+}
+
+class VendeurProduit {
+    - id : Long
+    - prixVendeur : BigDecimal
+    - image : String
+    - description : String
+    - titre : String
+    - estApprouve : boolean
+    --
+    + getMarge() : BigDecimal
+    + getNoteMoyenne() : Double
+}
+
+class Commande {
+    - id : Long
+    - dateCommande : LocalDateTime
+    - statut : StatutCommande
+    - montantTotal : BigDecimal
+    --
+    + calculerMontantTotal() : BigDecimal
+    + getNombreProduits() : Integer
+}
+
+class LigneCommande {
+    - id : Long
+    - quantite : Integer
+    - prixUnitaire : BigDecimal
+    - sousTotal : BigDecimal
+    --
+    + calculerSousTotal() : BigDecimal
+}
+
+class Avis {
+    - id : Long
+    - note : Integer
+    - commentaire : String
+    - dateAvis : LocalDateTime
+    - estPositif : Boolean
+    - estCache : Boolean
+    --
+    + analyserSentiment() : boolean
+}
+
+' =====================
+' RELATIONS D'HÉRITAGE
+' =====================
+
+Utilisateur <|-- Admin
+Utilisateur <|-- Client
+Utilisateur <|-- Vendeur
+
+' =====================
+' ASSOCIATIONS
+' =====================
+
+' Utilisateur - Role
+Utilisateur "1" --> "1" Role : possède
+
+' Commande - StatutCommande
+Commande "1" --> "1" StatutCommande : a
+
+' Catégorie - Produit (1 à plusieurs)
+Categorie "1" -- "0..*" Produit : contient
+
+' Client - Commande (1 à plusieurs)
+Client "1" -- "0..*" Commande : passe
+
+' Client - Avis (1 à plusieurs)
+Client "1" -- "0..*" Avis : rédige
+
+' Vendeur - VendeurProduit (1 à plusieurs)
+Vendeur "1" -- "0..*" VendeurProduit : commercialise
+
+' Produit - VendeurProduit (1 à plusieurs)
+Produit "1" -- "0..*" VendeurProduit : est vendu via
+
+' Commande - LigneCommande (composition)
+Commande "1" *-- "1..*" LigneCommande : contient
+
+' LigneCommande - VendeurProduit
+LigneCommande "0..*" -- "1" VendeurProduit : concerne
+
+' Avis - VendeurProduit
+Avis "0..*" -- "1" VendeurProduit : évalue
+
+@enduml

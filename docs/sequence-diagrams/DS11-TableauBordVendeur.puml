@@ -1,0 +1,205 @@
+@startuml DS11 - Tableau de Bord Vendeur
+
+!theme plain
+title <size:20>**DS11 - Espace Vendeur**</size>\n<size:14>//Gestion de l'activité commerciale du vendeur//</size>
+
+skinparam backgroundColor #FEFEFE
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 250
+
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    FontColor #1565C0
+}
+
+skinparam actor {
+    BackgroundColor #E1BEE7
+    BorderColor #7B1FA2
+}
+
+actor "🏪 Vendeur" as V #E1BEE7
+participant "📊 Espace\nVendeur" as E #E3F2FD
+participant "📦 Mes\nProduits" as P #FFF3E0
+participant "⭐ Mes\nAvis" as A #FCE4EC
+participant "📈 Mes\nStatistiques" as S #E8F5E9
+
+note over V, S #E1F5FE
+    **Objectif métier** : Le vendeur gère son activité,
+    ses offres et sa réputation sur la plateforme
+end note
+
+== 🏠 ACCUEIL ESPACE VENDEUR ==
+
+V -> E: Accéder à mon espace vendeur
+activate E #BBDEFB
+E --> V: **Tableau de bord**
+deactivate E
+
+note right of E #FFFDE7
+    **Vue d'ensemble :**
+    ┌─────────────────────────────────┐
+    │ 🏪 Bienvenue, Mohamed !         │
+    ├─────────────────────────────────┤
+    │ 📦 Mes produits : 12            │
+    │ ✅ Approuvés : 10               │
+    │ ⏳ En attente : 2               │
+    ├─────────────────────────────────┤
+    │ ⭐ Note moyenne : 4.6/5         │
+    │ 💬 Nouveaux avis : 3            │
+    ├─────────────────────────────────┤
+    │ 💰 Ventes ce mois : 2 450 €     │
+    │ 📊 Commandes : 18               │
+    └─────────────────────────────────┘
+end note
+
+|||
+
+== 📦 GESTION DE MES PRODUITS ==
+
+V -> P: Consulter "Mes produits"
+activate P #FFE0B2
+P --> V: **Liste de mes offres**
+deactivate P
+
+note right of P #FFFDE7
+    **Mes offres :**
+    ┌────────────────┬────────┬───────────┐
+    │ Produit        │ Prix   │ Statut    │
+    ├────────────────┼────────┼───────────┤
+    │ iPhone 15 Pro  │ 1099 € │ ✅ Actif  │
+    │ Galaxy S24     │ 899 €  │ ✅ Actif  │
+    │ MacBook Air    │ 1299 € │ ⏳ Attente│
+    └────────────────┴────────┴───────────┘
+end note
+
+V -> P: Modifier une offre existante
+activate P #FFE0B2
+P --> V: **Formulaire de modification**
+deactivate P
+
+note right of V #FFFDE7
+    **Le vendeur peut modifier :**
+    • Son prix de vente
+    • Le titre de son offre
+    • La description
+    • La photo
+end note
+
+V -> P: Enregistrer les modifications
+activate P #FFE0B2
+P -> P: Mise à jour de l'offre
+
+note right of P #E8F5E9
+    **⚠️ Note importante :**
+    Si le prix change de plus de 20%,
+    une nouvelle approbation admin
+    peut être requise
+end note
+
+P --> V: **✅ Offre mise à jour !**
+deactivate P
+
+|||
+
+== ⭐ GESTION DES AVIS ==
+
+V -> A: Consulter "Mes avis"
+activate A #F8BBD9
+A --> V: **Liste de mes avis clients**
+deactivate A
+
+note right of A #FFFDE7
+    **Avis récents :**
+    ════════════════════════════════
+    ⭐⭐⭐⭐⭐ sur iPhone 15 Pro
+    "Super vendeur, rapide !"
+    👤 Ahmed - 27/12/2024
+    ════════════════════════════════
+    ⭐⭐☆☆☆ sur Galaxy S24
+    "Produit reçu avec retard"
+    👤 Sara - 26/12/2024
+    ════════════════════════════════
+end note
+
+V -> A: Masquer un avis inapproprié
+activate A #F8BBD9
+
+note right of V #FFEBEE
+    **Motifs de masquage :**
+    • Langage inapproprié
+    • Contenu non pertinent
+    • Spam ou faux avis
+end note
+
+A -> A: estCache = true
+A --> V: **Avis masqué**\nIl n'est plus visible publiquement
+deactivate A
+
+|||
+
+== 📈 CONSULTATION DES STATISTIQUES ==
+
+V -> S: Consulter "Mes statistiques"
+activate S #C8E6C9
+S --> V: **Tableau de bord analytique**
+deactivate S
+
+note right of S #E8F5E9
+    **Statistiques du vendeur :**
+    ┌─────────────────────────────────┐
+    │ 📅 Période : Décembre 2024      │
+    ├─────────────────────────────────┤
+    │ 💰 Chiffre d'affaires : 2 450 € │
+    │ 📦 Produits vendus : 23         │
+    │ 📋 Commandes : 18               │
+    ├─────────────────────────────────┤
+    │ 📊 Top produit : iPhone 15 Pro  │
+    │    (8 ventes - 8 792 €)         │
+    ├─────────────────────────────────┤
+    │ ⭐ Satisfaction client : 4.6/5  │
+    │ 💬 Avis positifs : 92%          │
+    └─────────────────────────────────┘
+end note
+
+|||
+
+== 🔄 CYCLE DE VIE D'UNE OFFRE VENDEUR ==
+
+note over V, S #FFFDE7
+    **États possibles d'une offre (VendeurProduit) :**
+    
+    ┌──────────────────────────────────────────┐
+    │  📝 BROUILLON                            │
+    │      ↓ (soumission)                      │
+    │  ⏳ EN_ATTENTE_APPROBATION               │
+    │      ↓ (décision admin)                  │
+    │  ┌─────────┬─────────────┐               │
+    │  │ ✅ ACTIF │ ❌ REJETÉE  │               │
+    │  └─────────┴─────────────┘               │
+    │      ↓ (action vendeur)                  │
+    │  🔒 DÉSACTIVÉE (par le vendeur)          │
+    └──────────────────────────────────────────┘
+end note
+
+|||
+
+== ➕ NOUVELLE OFFRE ==
+
+V -> P: Ajouter un nouveau produit
+activate P #FFE0B2
+P --> V: Redirection vers inscription produit\n(voir DS04)
+deactivate P
+
+|||
+
+note over V, S #E1F5FE
+    **Règles métier :**
+    • Le vendeur ne voit que ses propres données
+    • Les avis masqués restent en base mais invisibles
+    • Les statistiques sont mises à jour en temps réel
+    • Le vendeur peut désactiver temporairement une offre
+end note
+
+@enduml

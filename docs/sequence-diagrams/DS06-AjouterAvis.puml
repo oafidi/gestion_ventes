@@ -1,0 +1,145 @@
+@startuml DS06 - Ajouter Avis
+
+!theme plain
+title <size:20>**DS06 - Système d'Avis Client**</size>\n<size:14>//Évaluation des produits et vendeurs//</size>
+
+skinparam backgroundColor #FEFEFE
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 200
+
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    FontColor #1565C0
+}
+
+skinparam actor {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+}
+
+actor "🛒 Client" as C #FFF3E0
+participant "📄 Fiche\nProduit" as F #E3F2FD
+participant "⭐ Système\nAvis" as SA #FFF3E0
+participant "🏪 Vendeur" as V #E1BEE7
+
+note over C, V #E1F5FE
+    **Objectif métier** : Permettre aux clients de partager
+    leur expérience et aider les futurs acheteurs
+end note
+
+== 📄 PHASE 1 : Accès au Produit ==
+
+C -> F: Consulter un produit acheté
+activate F #BBDEFB
+F --> C: **Fiche produit**\navec section "Avis clients"
+deactivate F
+
+note right of F #FFFDE7
+    **Avis existants :**
+    ════════════════════════
+    ⭐⭐⭐⭐⭐ Ahmed
+    "Excellent produit !"
+    ────────────────────────
+    ⭐⭐⭐⭐☆ Sara
+    "Très bien, livraison rapide"
+    ════════════════════════
+    **Note moyenne : 4.5/5**
+end note
+
+C -> F: Cliquer "Donner mon avis"
+activate F #BBDEFB
+F --> C: **Formulaire d'avis**
+deactivate F
+
+|||
+
+== ✏️ PHASE 2 : Rédaction de l'Avis ==
+
+note right of C #FFFDE7
+    **Le client remplit :**
+    ┌─────────────────────────────┐
+    │ Note : ⭐⭐⭐⭐☆ (4/5)      │
+    ├─────────────────────────────┤
+    │ Commentaire :               │
+    │ "Très bon produit, la       │
+    │ qualité est au rendez-vous. │
+    │ Je recommande ce vendeur !" │
+    └─────────────────────────────┘
+end note
+
+C -> F: Soumettre l'avis
+activate F #BBDEFB
+F -> SA: Enregistrer l'avis
+activate SA #FFE0B2
+
+SA -> SA: Vérifier si avis déjà donné
+
+alt #FFEBEE <color:#C62828>❌ Avis déjà existant</color>
+    SA --> F: Client a déjà noté ce produit
+    F --> C: **Vous avez déjà donné un avis**\nVous pouvez le modifier
+    deactivate SA
+    deactivate F
+else #E8F5E9 <color:#2E7D32>✅ Nouvel avis</color>
+    SA -> SA: Analyse du sentiment
+    
+    note right of SA #E8F5E9
+        **Analyse automatique :**
+        Commentaire positif détecté
+        → estPositif = true
+    end note
+    
+    SA -> SA: Enregistrer l'avis
+    
+    note right of SA #FFFDE7
+        **Avis enregistré :**
+        • Client : [Nom]
+        • Note : 4/5
+        • Commentaire : "..."
+        • Date : 28/12/2024
+        • Sentiment : Positif ✅
+    end note
+    
+    SA --> F: Avis enregistré
+    deactivate SA
+    F --> C: **✅ Merci pour votre avis !**\nIl est maintenant visible\npar les autres clients
+    deactivate F
+end
+
+|||
+
+== 🔔 NOTIFICATION AU VENDEUR ==
+
+SA -> V: 📧 Nouvel avis reçu
+note right of V #E1BEE7
+    "Vous avez reçu un
+    nouvel avis 4★ sur
+    votre produit iPhone 15"
+end note
+
+|||
+
+== 👁️ GESTION PAR LE VENDEUR ==
+
+V -> V: Consulter ses avis
+
+note right of V #FFFDE7
+    **Le vendeur peut :**
+    • Voir tous ses avis
+    • Identifier les avis négatifs
+    • Masquer un avis inapproprié
+      (estCache = true)
+end note
+
+|||
+
+note over C, V #E1F5FE
+    **Règles métier :**
+    • Un client ne peut donner qu'un seul avis par produit/vendeur
+    • L'analyse de sentiment est automatique
+    • Le vendeur peut masquer les avis inappropriés
+    • La note moyenne est recalculée automatiquement
+end note
+
+@enduml

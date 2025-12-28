@@ -1,0 +1,126 @@
+@startuml DS01 - Authentification
+
+!theme plain
+title <size:20>**DS01 - Authentification Utilisateur**</size>\n<size:14>//Processus de connexion et gestion des accès//</size>
+
+skinparam backgroundColor #FEFEFE
+skinparam handwritten false
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 200
+skinparam wrapWidth 200
+
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    FontColor #1565C0
+}
+
+skinparam actor {
+    BackgroundColor #FFF3E0
+    BorderColor #F57C00
+}
+
+skinparam note {
+    BackgroundColor #FFFDE7
+    BorderColor #FBC02D
+}
+
+actor "👤 Utilisateur\n(Client/Vendeur/Admin)" as U #FFF3E0
+participant "🖥️ Page\nConnexion" as P #E3F2FD
+participant "🔐 Système\nAuthentification" as G #E8F5E9
+
+note over U, G #E1F5FE
+    **Objectif métier** : Permettre aux utilisateurs
+    d'accéder à leur espace personnel selon leur rôle
+end note
+
+== 📝 INSCRIPTION - Nouveau Compte ==
+
+U -> P: Demande d'inscription
+activate P #BBDEFB
+P --> U: Formulaire d'inscription
+deactivate P
+
+note right of U #FFFDE7
+    **Informations requises :**
+    • Nom complet
+    • Adresse email
+    • Mot de passe
+    • Rôle souhaité (Client/Vendeur)
+    • Téléphone
+end note
+
+U -> P: Soumet les informations
+activate P #BBDEFB
+P -> G: Vérifie disponibilité email
+activate G #C8E6C9
+
+alt #FFEBEE <color:#C62828>❌ Email déjà utilisé</color>
+    G --> P: Email existant
+    P --> U: **Erreur** : Cet email est déjà associé à un compte
+    deactivate G
+    deactivate P
+else #E8F5E9 <color:#2E7D32>✅ Email disponible</color>
+    G -> G: Création du compte
+    note right of G #E8F5E9
+        Le vendeur est créé
+        avec **estApprouve = false**
+        (nécessite validation Admin)
+    end note
+    G --> P: Compte créé avec succès
+    deactivate G
+    P --> U: **Bienvenue !**\nRedirection vers votre espace
+    deactivate P
+end
+
+|||
+
+== 🔑 CONNEXION - Accès au Compte ==
+
+U -> P: Saisie email + mot de passe
+activate P #BBDEFB
+P -> G: Vérification des identifiants
+activate G #C8E6C9
+
+alt #FFEBEE <color:#C62828>❌ Échec d'authentification</color>
+    G --> P: Identifiants invalides
+    P --> U: **Erreur** : Email ou mot de passe incorrect
+    deactivate G
+    deactivate P
+else #E8F5E9 <color:#2E7D32>✅ Authentification réussie</color>
+    G --> P: Utilisateur authentifié + Rôle
+    deactivate G
+    
+    alt Rôle = ADMIN
+        P --> U: 🛡️ Redirection → **Tableau de bord Admin**
+    else Rôle = VENDEUR
+        P --> U: 🏪 Redirection → **Espace Vendeur**
+    else Rôle = CLIENT
+        P --> U: 🛒 Redirection → **Boutique & Mon Compte**
+    end
+    deactivate P
+end
+
+|||
+
+== 🚪 DÉCONNEXION ==
+
+U -> P: Clic sur "Déconnexion"
+activate P #BBDEFB
+P -> G: Fermeture de session
+activate G #C8E6C9
+G -> G: Invalidation du token
+G --> P: Session terminée
+deactivate G
+P --> U: Retour à l'accueil\n**À bientôt !**
+deactivate P
+
+note over U, G #E1F5FE
+    **Règles métier :**
+    • Un vendeur doit être approuvé par l'admin pour vendre
+    • Chaque rôle a des droits spécifiques
+    • Session sécurisée avec expiration automatique
+end note
+
+@enduml

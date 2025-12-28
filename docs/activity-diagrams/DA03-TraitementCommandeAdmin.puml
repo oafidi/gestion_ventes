@@ -1,0 +1,140 @@
+@startuml DA03 - Traitement Commande Admin
+
+!theme plain
+title <size:20>**DA03 - Traitement des Commandes**</size>\n<size:14>//Gestion du cycle de vie par l'administrateur//</size>
+
+skinparam backgroundColor #FEFEFE
+skinparam ActivityBackgroundColor #E3F2FD
+skinparam ActivityBorderColor #1976D2
+skinparam ActivityDiamondBackgroundColor #FFF3E0
+skinparam ActivityDiamondBorderColor #F57C00
+skinparam ArrowColor #1976D2
+
+|#E8F5E9| 🛡️ Administrateur |
+|#E3F2FD| 📋 Système Commandes |
+|#FCE4EC| 📦 Gestion Stock |
+|#FFF3E0| 🛒 Client |
+
+start
+
+|🛡️ Administrateur|
+:Accéder au tableau de bord;
+
+|📋 Système Commandes|
+:Afficher les commandes en attente;
+
+note right
+    **Commandes à traiter :**
+    ┌────────┬─────────┬────────┐
+    │ N°     │ Montant │ Statut │
+    ├────────┼─────────┼────────┤
+    │ #0042  │ 150€    │ 🟡     │
+    │ #0041  │ 85€     │ 🟡     │
+    │ #0040  │ 200€    │ 🟡     │
+    └────────┴─────────┴────────┘
+end note
+
+|🛡️ Administrateur|
+:Sélectionner une commande;
+
+|📋 Système Commandes|
+:Afficher les détails complets;
+
+|🛡️ Administrateur|
+:Examiner la commande;
+
+note right
+    **Vérifications :**
+    • Articles commandés
+    • Informations client
+    • Adresse de livraison
+    • Stock disponible
+end note
+
+switch (Décision de l'administrateur ?)
+
+case (✅ Confirmer)
+    
+    |📋 Système Commandes|
+    :Changer statut → CONFIRMÉE;
+    :Enregistrer date de confirmation;
+    
+    |🛒 Client|
+    :📧 Recevoir notification\n"Commande confirmée";
+    
+    |🛡️ Administrateur|
+    :Préparer l'expédition;
+    
+    |📋 Système Commandes|
+    :Changer statut → EN_COURS_LIVRAISON;
+    :Générer numéro de suivi;
+    
+    |🛒 Client|
+    :📧 Recevoir notification\n"Colis expédié"\nN° suivi : TRK-XXX;
+    
+    |📋 Système Commandes|
+    #LightGreen:Attendre confirmation livraison;
+    
+    if (Livraison confirmée ?) then (Oui)
+        :Changer statut → LIVRÉE;
+        :Clôturer la commande;
+        
+        |🛒 Client|
+        :📧 Recevoir notification\n"Commande livrée"\n⭐ Donnez votre avis !;
+    else (Problème livraison)
+        |📋 Système Commandes|
+        :Signaler le problème;
+        :Contacter le client;
+    endif
+
+case (❌ Annuler)
+    
+    |📋 Système Commandes|
+    :Changer statut → ANNULÉE;
+    
+    |📦 Gestion Stock|
+    :🔄 Restaurer le stock réservé;
+    
+    note right
+        **Restauration stock :**
+        Les quantités sont
+        remises à disposition
+    end note
+    
+    |📋 Système Commandes|
+    :Initier le remboursement;
+    
+    |🛒 Client|
+    :📧 Recevoir notification\n"Commande annulée"\n💰 Remboursement en cours;
+
+case (⏸️ Mettre en attente)
+    
+    |📋 Système Commandes|
+    :Ajouter une note interne;
+    :Marquer pour suivi ultérieur;
+    
+    |🛡️ Administrateur|
+    :Contacter le client si nécessaire;
+
+endswitch
+
+|🛡️ Administrateur|
+:Traiter la commande suivante;
+
+stop
+
+legend right
+    **Cycle de vie :**
+    ═══════════════════════════
+    🟡 EN_ATTENTE
+       ↓
+    🟢 CONFIRMÉE
+       ↓
+    🔵 EN_COURS_LIVRAISON
+       ↓
+    ✅ LIVRÉE
+    
+    ❌ ANNULÉE (à tout moment)
+endlegend
+
+@enduml

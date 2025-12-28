@@ -1,0 +1,188 @@
+@startuml DA10 - Gestion Categories
+
+!theme plain
+title <size:20>**DA10 - Gestion des Catégories**</size>\n<size:14>//Organisation du catalogue par l'administrateur//</size>
+
+skinparam backgroundColor #FEFEFE
+skinparam ActivityBackgroundColor #E3F2FD
+skinparam ActivityBorderColor #1976D2
+skinparam ActivityDiamondBackgroundColor #FFF3E0
+skinparam ActivityDiamondBorderColor #F57C00
+skinparam ArrowColor #1976D2
+
+|#E8F5E9| 🛡️ Administrateur |
+|#E3F2FD| 📂 Gestion Catégories |
+|#FCE4EC| 📦 Produits |
+
+start
+
+|🛡️ Administrateur|
+:Accéder à la gestion des catégories;
+
+|📂 Gestion Catégories|
+:Afficher l'arborescence des catégories;
+
+note right
+    **Catégories actuelles :**
+    ┌──────────────────────────────┐
+    │ 📂 Catégories (5)            │
+    ├──────────────────────────────┤
+    │ 📱 Smartphones    → 45 prod. │
+    │ 💻 Ordinateurs    → 32 prod. │
+    │ 🎧 Accessoires    → 89 prod. │
+    │ 📷 Photo & Vidéo  → 23 prod. │
+    │ 🎮 Gaming         → 56 prod. │
+    └──────────────────────────────┘
+end note
+
+|🛡️ Administrateur|
+switch (Action souhaitée ?)
+
+case (➕ Créer une catégorie)
+    
+    :Cliquer sur "Nouvelle catégorie";
+    
+    |📂 Gestion Catégories|
+    :Afficher le formulaire;
+    
+    |🛡️ Administrateur|
+    :📝 Saisir les informations;
+    
+    note right
+        **Nouvelle catégorie :**
+        ┌─────────────────────┐
+        │ Nom : Audio & Hi-Fi │
+        │ Image : 🎵 [upload] │
+        │ Description : ...   │
+        └─────────────────────┘
+    end note
+    
+    :Valider la création;
+    
+    |📂 Gestion Catégories|
+    :Vérifier l'unicité du nom;
+    
+    if (Nom déjà existant ?) then (Oui)
+        :❌ Erreur : Nom déjà utilisé;
+        |🛡️ Administrateur|
+        :Choisir un autre nom;
+    else (Non)
+        :✅ Créer la catégorie;
+        
+        |🛡️ Administrateur|
+        :🎉 "Catégorie créée !";
+    endif
+
+case (✏️ Modifier une catégorie)
+    
+    :Sélectionner une catégorie;
+    
+    |📂 Gestion Catégories|
+    :Afficher les informations actuelles;
+    
+    |🛡️ Administrateur|
+    :Modifier le nom, l'image ou la description;
+    :Enregistrer les modifications;
+    
+    |📂 Gestion Catégories|
+    :✅ Mettre à jour la catégorie;
+    
+    |🛡️ Administrateur|
+    :🎉 "Catégorie mise à jour !";
+
+case (🗑️ Supprimer une catégorie)
+    
+    :Sélectionner une catégorie;
+    
+    |📂 Gestion Catégories|
+    :Compter les produits associés;
+    
+    |📦 Produits|
+    :Retourner le nombre de produits;
+    
+    |📂 Gestion Catégories|
+    if (Catégorie vide ?) then (Non)
+        
+        :⚠️ Afficher avertissement;
+        
+        note right
+            **Attention !**
+            Cette catégorie contient
+            45 produits.
+            
+            Vous devez d'abord :
+            • Déplacer les produits
+            • Ou les supprimer
+        end note
+        
+        |🛡️ Administrateur|
+        switch (Choix ?)
+        case (Déplacer les produits)
+            :Sélectionner catégorie de destination;
+            
+            |📂 Gestion Catégories|
+            :Déplacer tous les produits;
+            
+            |📦 Produits|
+            :Mettre à jour les produits;
+            
+            |📂 Gestion Catégories|
+            :Supprimer la catégorie vide;
+            
+        case (Annuler)
+            :Abandonner la suppression;
+            stop
+        endswitch
+        
+    else (Oui)
+        
+        |🛡️ Administrateur|
+        :Confirmer la suppression;
+        
+        |📂 Gestion Catégories|
+        :✅ Supprimer la catégorie;
+        
+    endif
+    
+    |🛡️ Administrateur|
+    :🎉 "Catégorie supprimée !";
+
+case (📦 Réorganiser les produits)
+    
+    :Sélectionner les produits à déplacer;
+    
+    note right
+        **Sélection multiple :**
+        ☑️ iPhone 15 Pro
+        ☑️ iPhone 15
+        ☐ Galaxy S24
+        ☑️ iPhone 14
+    end note
+    
+    :Choisir la catégorie de destination;
+    
+    |📂 Gestion Catégories|
+    :Déplacer les produits sélectionnés;
+    
+    |📦 Produits|
+    :Mettre à jour la catégorie des produits;
+    
+    |🛡️ Administrateur|
+    :✅ "3 produits déplacés vers Smartphones";
+
+endswitch
+
+:Retour à la liste des catégories;
+
+stop
+
+legend right
+    **Règles métier :**
+    ══════════════════════════════
+    • Nom de catégorie unique
+    • Suppression si vide uniquement
+    • Un produit = une catégorie
+    • Réorganisation par lot possible
+endlegend
+
+@enduml

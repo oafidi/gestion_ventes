@@ -1,0 +1,174 @@
+@startuml DS05 - Approbation Admin
+
+!theme plain
+title <size:20>**DS05 - Approbation par l'Administrateur**</size>\n<size:14>//Validation des vendeurs et de leurs offres//</size>
+
+skinparam backgroundColor #FEFEFE
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 250
+
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    FontColor #1565C0
+}
+
+skinparam actor {
+    BackgroundColor #E8F5E9
+    BorderColor #388E3C
+}
+
+actor "🛡️ Administrateur" as A #E8F5E9
+participant "📊 Tableau de Bord\nAdmin" as T #E3F2FD
+participant "👥 Gestion\nVendeurs" as GV #FFF3E0
+participant "📦 Gestion\nOffres" as GO #FCE4EC
+participant "🏪 Vendeur" as V #E1BEE7
+
+note over A, V #E1F5FE
+    **Objectif métier** : L'administrateur contrôle
+    la qualité des vendeurs et des offres sur la plateforme
+end note
+
+== 👥 PARTIE 1 : APPROBATION DES VENDEURS ==
+
+A -> T: Accéder aux "Vendeurs en attente"
+activate T #BBDEFB
+T -> GV: Récupérer les demandes
+activate GV #FFE0B2
+GV --> T: Liste des vendeurs non approuvés
+deactivate GV
+
+T --> A: **Demandes en attente**
+deactivate T
+
+note right of T #FFFDE7
+    **Vendeurs en attente :**
+    ┌───────────────────────────────┐
+    │ 📋 3 demandes en attente      │
+    ├───────────────────────────────┤
+    │ 👤 Mohamed Ali                │
+    │    📧 mohamed@email.com       │
+    │    📅 Inscrit le 27/12/2024   │
+    ├───────────────────────────────┤
+    │ 👤 Sara Bennani               │
+    │    📧 sara.b@email.com        │
+    │    📅 Inscrit le 26/12/2024   │
+    └───────────────────────────────┘
+end note
+
+A -> T: Examiner le profil de Mohamed
+activate T #BBDEFB
+T --> A: **Fiche vendeur détaillée**
+deactivate T
+
+alt #FFEBEE <color:#C62828>❌ Refus du vendeur</color>
+    A -> T: Cliquer "Rejeter"
+    activate T #BBDEFB
+    T -> GV: Rejeter la demande
+    activate GV #FFE0B2
+    GV --> T: Demande rejetée
+    deactivate GV
+    T -> V: 📧 Notification de refus
+    T --> A: **Vendeur rejeté**
+    deactivate T
+else #E8F5E9 <color:#2E7D32>✅ Approbation du vendeur</color>
+    A -> T: Cliquer "Approuver"
+    activate T #BBDEFB
+    T -> GV: Approuver le vendeur
+    activate GV #FFE0B2
+    GV -> GV: estApprouve = true
+    GV --> T: Vendeur activé
+    deactivate GV
+    
+    T -> V: 📧 Notification d'approbation
+    note right of V #E8F5E9
+        "Félicitations !
+        Votre compte vendeur
+        est maintenant actif."
+    end note
+    
+    T --> A: **✅ Vendeur approuvé**\nIl peut maintenant soumettre des offres
+    deactivate T
+end
+
+|||
+== 📦 PARTIE 2 : APPROBATION DES OFFRES ==
+
+A -> T: Accéder aux "Offres en attente"
+activate T #BBDEFB
+T -> GO: Récupérer les offres non approuvées
+activate GO #F8BBD9
+GO --> T: Liste des offres en attente
+deactivate GO
+
+T --> A: **Offres à valider**
+deactivate T
+
+note right of T #FFFDE7
+    **Offres en attente :**
+    ┌────────────────────────────────────┐
+    │ 📦 iPhone 15 Pro                   │
+    │    👤 Vendeur : Mohamed Ali        │
+    │    💰 Prix : 1150 €                │
+    │    📅 Soumise le 28/12/2024        │
+    ├────────────────────────────────────┤
+    │ 📦 Samsung Galaxy S24              │
+    │    👤 Vendeur : Sara Bennani       │
+    │    💰 Prix : 899 €                 │
+    └────────────────────────────────────┘
+end note
+
+A -> T: Examiner l'offre iPhone 15 Pro
+activate T #BBDEFB
+T --> A: **Détails de l'offre**\n- Description\n- Prix proposé\n- Photos fournies
+deactivate T
+
+alt #FFEBEE <color:#C62828>❌ Refus de l'offre</color>
+    note right of A #FFEBEE
+        **Motifs de refus :**
+        • Prix non conforme
+        • Description inadéquate
+        • Photos de mauvaise qualité
+    end note
+    
+    A -> T: Cliquer "Rejeter"
+    activate T #BBDEFB
+    T -> GO: Rejeter l'offre
+    activate GO #F8BBD9
+    GO --> T: Offre supprimée
+    deactivate GO
+    T -> V: 📧 Notification de refus
+    T --> A: **Offre rejetée**
+    deactivate T
+else #E8F5E9 <color:#2E7D32>✅ Approbation de l'offre</color>
+    A -> T: Cliquer "Approuver"
+    activate T #BBDEFB
+    T -> GO: Approuver l'offre
+    activate GO #F8BBD9
+    GO -> GO: estApprouve = true
+    GO --> T: Offre visible en boutique
+    deactivate GO
+    
+    T -> V: 📧 Notification d'approbation
+    note right of V #E8F5E9
+        "Votre offre pour
+        iPhone 15 Pro
+        est maintenant en ligne !"
+    end note
+    
+    T --> A: **✅ Offre approuvée**\nVisible dans la boutique
+    deactivate T
+end
+
+|||
+
+note over A, V #E1F5FE
+    **Règles métier :**
+    • Seul l'admin peut approuver vendeurs et offres
+    • Un vendeur non approuvé ne peut pas vendre
+    • Une offre non approuvée n'est pas visible
+    • Les notifications tiennent le vendeur informé
+end note
+
+@enduml

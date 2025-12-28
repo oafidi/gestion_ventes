@@ -1,0 +1,114 @@
+@startuml DA01 - Authentification
+
+!theme plain
+title <size:20>**DA01 - Processus d'Authentification**</size>\n<size:14>//Inscription et Connexion des utilisateurs//</size>
+
+skinparam backgroundColor #FEFEFE
+skinparam ActivityBackgroundColor #E3F2FD
+skinparam ActivityBorderColor #1976D2
+skinparam ActivityDiamondBackgroundColor #FFF3E0
+skinparam ActivityDiamondBorderColor #F57C00
+skinparam ArrowColor #1976D2
+
+|#E8F5E9| 👤 Utilisateur |
+|#E3F2FD| 🔐 Système Authentification |
+
+start
+
+|👤 Utilisateur|
+:Accéder à la plateforme;
+
+if (Possède un compte ?) then (Non)
+    
+    :📝 Remplir le formulaire d'inscription;
+    note right
+        **Informations requises :**
+        • Nom complet
+        • Email
+        • Mot de passe
+        • Rôle (Client / Vendeur)
+        • Téléphone
+    end note
+    
+    |🔐 Système Authentification|
+    :Vérifier la disponibilité de l'email;
+    
+    if (Email déjà utilisé ?) then (Oui)
+        :❌ Afficher erreur\n"Email déjà existant";
+        |👤 Utilisateur|
+        :Corriger l'email;
+        stop
+    else (Non)
+        :✅ Créer le compte utilisateur;
+        
+        if (Rôle = Vendeur ?) then (Oui)
+            :Marquer comme\n"En attente d'approbation";
+            note right
+                **estApprouve = false**
+                Le vendeur doit attendre
+                la validation admin
+            end note
+        else (Non - Client)
+            :Compte actif immédiatement;
+        endif
+        
+        :📧 Envoyer email de bienvenue;
+    endif
+    
+else (Oui)
+    
+    |👤 Utilisateur|
+    :🔑 Saisir email et mot de passe;
+    
+    |🔐 Système Authentification|
+    :Vérifier les identifiants;
+    
+    if (Identifiants valides ?) then (Non)
+        :❌ Afficher erreur\n"Identifiants incorrects";
+        
+        if (3 tentatives échouées ?) then (Oui)
+            :🔒 Bloquer temporairement le compte;
+            stop
+        else (Non)
+            |👤 Utilisateur|
+            :Réessayer la connexion;
+            stop
+        endif
+        
+    else (Oui)
+        :✅ Créer la session utilisateur;
+    endif
+    
+endif
+
+|🔐 Système Authentification|
+:Déterminer le rôle de l'utilisateur;
+
+switch (Rôle de l'utilisateur ?)
+case (🛡️ ADMIN)
+    :Rediriger vers\n**Tableau de bord Admin**;
+case (🏪 VENDEUR)
+    if (Vendeur approuvé ?) then (Oui)
+        :Rediriger vers\n**Espace Vendeur**;
+    else (Non)
+        :Rediriger vers\n**Page d'attente**\n"Compte en cours de validation";
+    endif
+case (🛒 CLIENT)
+    :Rediriger vers\n**Boutique en ligne**;
+endswitch
+
+|👤 Utilisateur|
+:🎉 Accès à l'espace personnel;
+
+stop
+
+legend right
+    **Règles métier :**
+    ════════════════════════
+    • Email unique par compte
+    • Vendeur nécessite approbation
+    • 3 échecs = blocage temporaire
+    • Session avec expiration
+endlegend
+
+@enduml

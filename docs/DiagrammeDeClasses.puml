@@ -1,0 +1,464 @@
+@startuml Diagramme de Classes - Gestion Ventes
+
+title Diagramme de Classes - Application Gestion des Ventes
+skinparam style strictuml
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam packageStyle rectangle
+
+' =====================
+' ÉNUMÉRATIONS
+' =====================
+package "Énumérations" #FFFFE0 {
+    enum Role {
+        ADMIN
+        VENDEUR
+        CLIENT
+    }
+
+    enum StatutCommande {
+        EN_ATTENTE
+        CONFIRMEE
+        EN_COURS_LIVRAISON
+        LIVREE
+        ANNULEE
+    }
+}
+
+' =====================
+' CLASSES ENTITÉS
+' =====================
+package "Entités (Entity)" #E8F5E9 {
+    abstract class Utilisateur {
+        - id : Long
+        - nom : String
+        - email : String
+        - motDePasse : String
+        - telephone : String
+        - role : Role
+        --
+        + getAuthorities() : Collection<GrantedAuthority>
+        + getPassword() : String
+        + getUsername() : String
+        + isAccountNonExpired() : boolean
+        + isAccountNonLocked() : boolean
+        + isCredentialsNonExpired() : boolean
+        + isEnabled() : boolean
+        + seConnecter() : void
+        + seDeconnecter() : void
+        + modifierProfil() : void
+    }
+
+    class Admin {
+        --
+        + approuverVendeur() : void
+        + gererCategories() : void
+        + gererProduits() : void
+        + gererStock() : void
+        + voirCommandes() : void
+        + voirStatistiques() : void
+    }
+
+    class Client {
+        - adresseLivraison : String
+        --
+        + passerCommande() : void
+        + ajouterAvis() : void
+    }
+
+    class Vendeur {
+        - estApprouve : boolean
+        --
+        + isEnabled() : boolean
+        + commercialiserProduit() : void
+        + voirCommandes() : void
+    }
+
+    class Categorie {
+        - id : Long
+        - nom : String
+        - image : String
+    }
+
+    class Produit {
+        - id : Long
+        - nom : String
+        - description : String
+        - prix : BigDecimal
+        - quantite : Integer
+        - image : String
+        - dateDernierStock : LocalDate
+    }
+
+    class VendeurProduit {
+        - id : Long
+        - prixVendeur : BigDecimal
+        - image : String
+        - description : String
+        - titre : String
+        - estApprouve : boolean
+    }
+
+    class Commande {
+        - id : Long
+        - dateCommande : LocalDateTime
+        - statut : StatutCommande
+        - montantTotal : BigDecimal
+    }
+
+    class LigneCommande {
+        - id : Long
+        - quantite : Integer
+        - prixUnitaire : BigDecimal
+        - sousTotal : BigDecimal
+    }
+
+    class Avis {
+        - id : Long
+        - note : Integer
+        - commentaire : String
+        - dateAvis : LocalDateTime
+        - estPositif : Boolean
+        - estCache : Boolean
+    }
+}
+
+' =====================
+' REPOSITORIES
+' =====================
+package "Repositories" #E3F2FD {
+    interface UtilisateurRepository <<Repository>> {
+        + findByEmail(email: String) : Optional<Utilisateur>
+        + existsByEmail(email: String) : boolean
+    }
+
+    interface AdminRepository <<Repository>> {
+        + findById(id: Long) : Optional<Admin>
+        + save(admin: Admin) : Admin
+    }
+
+    interface ClientRepository <<Repository>> {
+        + findById(id: Long) : Optional<Client>
+        + save(client: Client) : Client
+    }
+
+    interface VendeurRepository <<Repository>> {
+        + findByEstApprouve(estApprouve: boolean) : List<Vendeur>
+        + findAll() : List<Vendeur>
+        + save(vendeur: Vendeur) : Vendeur
+    }
+
+    interface CategorieRepository <<Repository>> {
+        + findAll() : List<Categorie>
+        + save(categorie: Categorie) : Categorie
+        + deleteById(id: Long) : void
+    }
+
+    interface ProduitRepository <<Repository>> {
+        + findAll() : List<Produit>
+        + findByCategorieId(categorieId: Long) : List<Produit>
+        + save(produit: Produit) : Produit
+    }
+
+    interface VendeurProduitRepository <<Repository>> {
+        + findByVendeurId(vendeurId: Long) : List<VendeurProduit>
+        + findByEstApprouve(estApprouve: boolean) : List<VendeurProduit>
+        + existsByVendeurIdAndProduitId(vendeurId: Long, produitId: Long) : boolean
+    }
+
+    interface CommandeRepository <<Repository>> {
+        + findByClientIdWithDetails(clientId: Long) : List<Commande>
+        + findByIdWithDetails(id: Long) : Optional<Commande>
+        + findAllWithDetails() : List<Commande>
+    }
+
+    interface LigneCommandeRepository <<Repository>> {
+        + findByCommandeId(commandeId: Long) : List<LigneCommande>
+    }
+
+    interface AvisRepository <<Repository>> {
+        + findByVendeurProduitIdAndNotHidden(vendeurProduitId: Long) : List<Avis>
+        + findByVendeurId(vendeurId: Long) : List<Avis>
+        + existsByClientIdAndVendeurProduitId(clientId: Long, vpId: Long) : boolean
+        + getAverageNoteByVendeurProduitId(vpId: Long) : Double
+        + countByVendeurProduitId(vpId: Long) : Long
+    }
+}
+
+' =====================
+' SERVICES
+' =====================
+package "Services" #FFF3E0 {
+    class AuthService <<Service>> {
+        - authenticationManager : AuthenticationManager
+        - utilisateurRepository : UtilisateurRepository
+        - passwordEncoder : PasswordEncoder
+        - tokenProvider : JwtTokenProvider
+        --
+        + signup(request: SignupRequest) : AuthResponse
+        + login(request: LoginRequest, response: HttpServletResponse) : AuthResponse
+        + logout(response: HttpServletResponse) : AuthResponse
+        + getCurrentUser(userId: Long) : AuthResponse
+    }
+
+    class AdminService <<Service>> {
+        - vendeurRepository : VendeurRepository
+        - vendeurProduitRepository : VendeurProduitRepository
+        - categorieRepository : CategorieRepository
+        - produitRepository : ProduitRepository
+        - commandeRepository : CommandeRepository
+        --
+        + getVendeursEnAttente() : List<Vendeur>
+        + getVendeursApprouves() : List<Vendeur>
+        + getAllVendeurs() : List<Vendeur>
+        + approuverVendeur(vendeurId: Long) : MessageResponse
+        + bannirVendeur(vendeurId: Long) : MessageResponse
+        + rejeterVendeur(vendeurId: Long) : MessageResponse
+        + getVendeurProduitsEnAttente() : List<VendeurProduit>
+        + approuverVendeurProduit(vpId: Long) : MessageResponse
+        + rejeterVendeurProduit(vpId: Long) : MessageResponse
+    }
+
+    class CommandeService <<Service>> {
+        - commandeRepository : CommandeRepository
+        - vendeurProduitRepository : VendeurProduitRepository
+        - clientRepository : ClientRepository
+        --
+        + passerCommande(clientId: Long, request: CommandeRequest) : CommandeResponse
+        + getMesCommandes(clientId: Long) : List<CommandeResponse>
+        + getCommandeById(clientId: Long, commandeId: Long) : CommandeResponse
+        + getAllCommandes() : List<CommandeResponse>
+        + getAllCommandesFiltered(vendeurId: Long, produitId: Long, statut: String) : List<CommandeResponse>
+        + updateStatutCommande(commandeId: Long, statut: StatutCommande) : MessageResponse
+    }
+
+    class AvisService <<Service>> {
+        - avisRepository : AvisRepository
+        - clientRepository : ClientRepository
+        - vendeurProduitRepository : VendeurProduitRepository
+        --
+        + ajouterAvis(clientId: Long, request: AvisRequest) : MessageResponse
+        + getAvisParProduit(vendeurProduitId: Long) : List<AvisResponse>
+        + getAvisParVendeur(vendeurId: Long) : List<AvisResponse>
+        + getMoyenneNotes(vendeurProduitId: Long) : Double
+        + getNombreAvis(vendeurProduitId: Long) : Long
+        + toggleVisibiliteAvis(vendeurId: Long, avisId: Long) : MessageResponse
+        - analyserSentiment(commentaire: String, note: Integer) : boolean
+    }
+
+    class VendeurProduitService <<Service>> {
+        - vendeurProduitRepository : VendeurProduitRepository
+        - vendeurRepository : VendeurRepository
+        - produitRepository : ProduitRepository
+        --
+        + inscrireProduit(vendeurId: Long, request: VendeurProduitRequest) : MessageResponse
+        + modifierVendeurProduit(vendeurId: Long, vpId: Long, prix: BigDecimal, titre: String, desc: String, img: String) : MessageResponse
+        + getMesProduits(vendeurId: Long) : List<VendeurProduitResponse>
+        + getProduitsApprouves() : List<VendeurProduitResponse>
+        + getProduitsApprouvesByCategorie(categorieId: Long) : List<VendeurProduitResponse>
+        + supprimerVendeurProduit(vendeurId: Long, vpId: Long) : MessageResponse
+    }
+
+    class FileStorageService <<Service>> {
+        - uploadDir : String
+        --
+        + storeFile(file: MultipartFile, subDir: String) : String
+        + loadFile(filename: String, subDir: String) : Resource
+        + deleteFile(filename: String, subDir: String) : boolean
+    }
+
+    class AnalyticsService <<Service>> {
+        - commandeRepository : CommandeRepository
+        - vendeurProduitRepository : VendeurProduitRepository
+        - avisRepository : AvisRepository
+        --
+        + getVentesByPeriode(debut: LocalDate, fin: LocalDate) : Map<String, Object>
+        + getTopProduits(limit: int) : List<Map<String, Object>>
+        + getTopVendeurs(limit: int) : List<Map<String, Object>>
+        + getStatistiquesGlobales() : Map<String, Object>
+    }
+
+    class CustomUserDetailsService <<Service>> {
+        - utilisateurRepository : UtilisateurRepository
+        --
+        + loadUserByUsername(email: String) : UserDetails
+    }
+}
+
+' =====================
+' CONTROLLERS
+' =====================
+package "Controllers" #FCE4EC {
+    class AuthController <<RestController>> {
+        - authService : AuthService
+        --
+        + signup(request: SignupRequest) : ResponseEntity<AuthResponse>
+        + login(request: LoginRequest, response: HttpServletResponse) : ResponseEntity<AuthResponse>
+        + logout(response: HttpServletResponse) : ResponseEntity<AuthResponse>
+        + getCurrentUser(authentication: Authentication) : ResponseEntity<AuthResponse>
+    }
+
+    class AdminController <<RestController>> {
+        - adminService : AdminService
+        --
+        + getVendeursEnAttente() : ResponseEntity<List<Vendeur>>
+        + approuverVendeur(id: Long) : ResponseEntity<MessageResponse>
+        + rejeterVendeur(id: Long) : ResponseEntity<MessageResponse>
+        + getVendeurProduitsEnAttente() : ResponseEntity<List<VendeurProduitResponse>>
+        + approuverVendeurProduit(id: Long) : ResponseEntity<MessageResponse>
+    }
+
+    class ClientController <<RestController>> {
+        - commandeService : CommandeService
+        --
+        + passerCommande(auth: Authentication, request: CommandeRequest) : ResponseEntity<CommandeResponse>
+        + getMesCommandes(auth: Authentication) : ResponseEntity<List<CommandeResponse>>
+        + getCommandeById(auth: Authentication, id: Long) : ResponseEntity<CommandeResponse>
+    }
+
+    class VendeurController <<RestController>> {
+        - vendeurProduitService : VendeurProduitService
+        - avisService : AvisService
+        --
+        + getMesProduits(auth: Authentication) : ResponseEntity<List<VendeurProduitResponse>>
+        + getMesAvis(auth: Authentication) : ResponseEntity<List<AvisResponse>>
+        + toggleAvisVisibilite(auth: Authentication, avisId: Long) : ResponseEntity<MessageResponse>
+    }
+
+    class VendeurProduitController <<RestController>> {
+        - vendeurProduitService : VendeurProduitService
+        - fileStorageService : FileStorageService
+        --
+        + inscrireProduit(auth: Authentication, request: VendeurProduitRequest) : ResponseEntity<MessageResponse>
+        + modifierProduit(auth: Authentication, id: Long, data: Map) : ResponseEntity<MessageResponse>
+        + supprimerProduit(auth: Authentication, id: Long) : ResponseEntity<MessageResponse>
+        + getProduitsApprouves() : ResponseEntity<List<VendeurProduitResponse>>
+    }
+
+    class ProduitController <<RestController>> {
+        - produitRepository : ProduitRepository
+        - fileStorageService : FileStorageService
+        --
+        + getAllProduits() : ResponseEntity<List<Produit>>
+        + getProduitById(id: Long) : ResponseEntity<Produit>
+        + createProduit(produit: Produit, file: MultipartFile) : ResponseEntity<Produit>
+        + updateProduit(id: Long, produit: Produit) : ResponseEntity<Produit>
+        + deleteProduit(id: Long) : ResponseEntity<Void>
+    }
+
+    class CategorieController <<RestController>> {
+        - categorieRepository : CategorieRepository
+        - fileStorageService : FileStorageService
+        --
+        + getAllCategories() : ResponseEntity<List<Categorie>>
+        + getCategorieById(id: Long) : ResponseEntity<Categorie>
+        + createCategorie(categorie: Categorie, file: MultipartFile) : ResponseEntity<Categorie>
+        + updateCategorie(id: Long, categorie: Categorie) : ResponseEntity<Categorie>
+        + deleteCategorie(id: Long) : ResponseEntity<Void>
+    }
+
+    class AvisController <<RestController>> {
+        - avisService : AvisService
+        --
+        + ajouterAvis(auth: Authentication, request: AvisRequest) : ResponseEntity<MessageResponse>
+        + getAvisParProduit(vendeurProduitId: Long) : ResponseEntity<List<AvisResponse>>
+        + getMoyenneNotes(vendeurProduitId: Long) : ResponseEntity<Double>
+    }
+
+    class AnalyticsController <<RestController>> {
+        - analyticsService : AnalyticsService
+        --
+        + getVentesByPeriode(debut: LocalDate, fin: LocalDate) : ResponseEntity<Map>
+        + getTopProduits(limit: int) : ResponseEntity<List<Map>>
+        + getStatistiques() : ResponseEntity<Map>
+    }
+}
+
+' =====================
+' RELATIONS D'HÉRITAGE
+' =====================
+
+Utilisateur <|-- Admin
+Utilisateur <|-- Client
+Utilisateur <|-- Vendeur
+
+' =====================
+' ASSOCIATIONS ENTITÉS
+' =====================
+
+' Utilisateur - Role
+Utilisateur --> "1" Role : a >
+
+' Commande - StatutCommande
+Commande --> "1" StatutCommande : a >
+
+' Catégorie - Produit (1 à plusieurs)
+Categorie "1" -- "0..*" Produit : contient >
+
+' Client - Commande (1 à plusieurs)
+Client "1" -- "0..*" Commande : passe >
+
+' Client - Avis (1 à plusieurs)
+Client "1" -- "0..*" Avis : écrit >
+
+' Vendeur - VendeurProduit (1 à plusieurs)
+Vendeur "1" -- "0..*" VendeurProduit : propose >
+
+' Produit - VendeurProduit (1 à plusieurs)
+Produit "1" -- "0..*" VendeurProduit : est proposé par >
+
+' Commande - LigneCommande (1 à plusieurs)
+Commande "1" -- "1..*" LigneCommande : contient >
+
+' LigneCommande - VendeurProduit
+LigneCommande "0..*" -- "1" VendeurProduit : concerne >
+
+' Avis - VendeurProduit
+Avis "0..*" -- "1" VendeurProduit : évalue >
+
+' =====================
+' DÉPENDANCES SERVICE-REPOSITORY
+' =====================
+
+AuthService ..> UtilisateurRepository : utilise
+AuthService ..> AdminRepository : utilise
+AuthService ..> VendeurRepository : utilise
+AuthService ..> ClientRepository : utilise
+
+AdminService ..> VendeurRepository : utilise
+AdminService ..> VendeurProduitRepository : utilise
+AdminService ..> CategorieRepository : utilise
+AdminService ..> ProduitRepository : utilise
+AdminService ..> CommandeRepository : utilise
+
+CommandeService ..> CommandeRepository : utilise
+CommandeService ..> VendeurProduitRepository : utilise
+CommandeService ..> ClientRepository : utilise
+
+AvisService ..> AvisRepository : utilise
+AvisService ..> ClientRepository : utilise
+AvisService ..> VendeurProduitRepository : utilise
+
+VendeurProduitService ..> VendeurProduitRepository : utilise
+VendeurProduitService ..> VendeurRepository : utilise
+VendeurProduitService ..> ProduitRepository : utilise
+
+CustomUserDetailsService ..> UtilisateurRepository : utilise
+
+' =====================
+' DÉPENDANCES CONTROLLER-SERVICE
+' =====================
+
+AuthController ..> AuthService : utilise
+AdminController ..> AdminService : utilise
+ClientController ..> CommandeService : utilise
+VendeurController ..> VendeurProduitService : utilise
+VendeurController ..> AvisService : utilise
+VendeurProduitController ..> VendeurProduitService : utilise
+VendeurProduitController ..> FileStorageService : utilise
+AvisController ..> AvisService : utilise
+AnalyticsController ..> AnalyticsService : utilise
+ProduitController ..> FileStorageService : utilise
+CategorieController ..> FileStorageService : utilise
+
+@enduml

@@ -1,0 +1,121 @@
+@startuml DS04 - Inscrire Produit Vendeur
+
+!theme plain
+title <size:20>**DS04 - Inscription d'un Produit**</size>\n<size:14>//Le vendeur propose un produit à la vente//</size>
+
+skinparam backgroundColor #FEFEFE
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam maxMessageSize 200
+
+skinparam participant {
+    BackgroundColor #E3F2FD
+    BorderColor #1976D2
+    FontColor #1565C0
+}
+
+skinparam actor {
+    BackgroundColor #E1BEE7
+    BorderColor #7B1FA2
+}
+
+actor "🏪 Vendeur" as V #E1BEE7
+participant "📱 Espace\nVendeur" as E #E3F2FD
+participant "📦 Catalogue\nProduits" as C #FFF3E0
+participant "📋 Offres\nVendeur" as O #E8F5E9
+
+note over V, O #E1F5FE
+    **Objectif métier** : Permettre au vendeur approuvé
+    de proposer ses propres offres sur les produits du catalogue
+end note
+
+== 📦 PHASE 1 : Sélection du Produit ==
+
+V -> E: Accéder à "Inscrire un produit"
+activate E #BBDEFB
+E -> C: Demander les produits disponibles
+activate C #FFE0B2
+C --> E: Liste des produits du catalogue
+deactivate C
+E --> V: **Catalogue des produits**\n(disponibles à la vente)
+deactivate E
+
+note right of E #FFFDE7
+    **Le vendeur voit :**
+    • Nom du produit
+    • Catégorie
+    • Prix de référence
+    • Description officielle
+end note
+
+V -> E: Sélectionner un produit\n(ex: "iPhone 15 Pro")
+activate E #BBDEFB
+E --> V: **Formulaire d'offre**
+deactivate E
+
+|||
+
+== ✏️ PHASE 2 : Création de l'Offre ==
+
+note right of V #FFFDE7
+    **Le vendeur définit :**
+    • Son prix de vente (ex: 1150 €)
+    • Titre personnalisé
+    • Description de son offre
+    • Photo du produit (optionnel)
+end note
+
+V -> E: Soumettre l'offre
+activate E #BBDEFB
+E -> O: Vérifier si déjà inscrit
+activate O #C8E6C9
+
+alt #FFEBEE <color:#C62828>❌ Produit déjà inscrit</color>
+    O --> E: Offre existante pour ce vendeur
+    E --> V: **Vous vendez déjà ce produit !**\nModifiez votre offre existante
+    deactivate O
+    deactivate E
+else #E8F5E9 <color:#2E7D32>✅ Nouvelle inscription</color>
+    O -> O: Créer l'offre (VendeurProduit)
+    
+    note right of O #E8F5E9
+        **Offre créée :**
+        • Vendeur : [Nom du vendeur]
+        • Produit : iPhone 15 Pro
+        • Prix vendeur : 1150 €
+        • Statut : **EN ATTENTE**
+        • Date : 28/12/2024
+    end note
+    
+    O --> E: Offre enregistrée
+    deactivate O
+    E --> V: **✅ Offre soumise !**\nElle sera visible après\nvalidation par l'administrateur
+    deactivate E
+end
+
+|||
+
+== ⏳ PHASE 3 : Attente de Validation ==
+
+note over V, O #FFFDE7
+    **En attente d'approbation**
+    Le vendeur peut :
+    • Consulter l'état de sa demande
+    • Modifier son offre
+    • Supprimer sa demande
+    
+    L'administrateur va examiner l'offre
+    (voir DS05 - Approbation Admin)
+end note
+
+|||
+
+note over V, O #E1F5FE
+    **Règles métier :**
+    • Un vendeur doit être approuvé pour soumettre des offres
+    • Chaque offre nécessite une validation admin
+    • Un vendeur ne peut avoir qu'une offre par produit
+    • Le prix vendeur peut différer du prix de référence
+end note
+
+@enduml

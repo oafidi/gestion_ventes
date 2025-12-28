@@ -1,0 +1,151 @@
+@startuml DA02 - Processus Commande
+
+!theme plain
+title <size:20>**DA02 - Processus de Commande**</size>\n<size:14>//De la navigation à la confirmation d'achat//</size>
+
+skinparam backgroundColor #FEFEFE
+skinparam ActivityBackgroundColor #E3F2FD
+skinparam ActivityBorderColor #1976D2
+skinparam ActivityDiamondBackgroundColor #FFF3E0
+skinparam ActivityDiamondBorderColor #F57C00
+skinparam ArrowColor #1976D2
+
+|#FFF3E0| 🛒 Client |
+|#E3F2FD| 🏪 Boutique |
+|#E8F5E9| 📦 Gestion Stock |
+|#FCE4EC| 📋 Gestion Commandes |
+
+start
+
+|🛒 Client|
+:Accéder à la boutique en ligne;
+
+|🏪 Boutique|
+:Afficher le catalogue de produits;
+
+|🛒 Client|
+repeat
+    :Parcourir les produits;
+    :Consulter une fiche produit;
+    
+    note right
+        **Informations visibles :**
+        • Description du produit
+        • Prix des différents vendeurs
+        • Note moyenne (⭐)
+        • Disponibilité
+    end note
+    
+    if (Produit intéressant ?) then (Oui)
+        :Sélectionner la quantité;
+        :Choisir le vendeur;
+        
+        |📦 Gestion Stock|
+        :Vérifier la disponibilité;
+        
+        if (Stock suffisant ?) then (Oui)
+            |🛒 Client|
+            :➕ Ajouter au panier;
+            
+            |🏪 Boutique|
+            :Mettre à jour le panier;
+            :Afficher confirmation;
+        else (Non)
+            |🏪 Boutique|
+            :⚠️ Afficher "Stock insuffisant"\nQuantité disponible : X;
+            
+            |🛒 Client|
+            :Ajuster la quantité;
+        endif
+    else (Non)
+        |🛒 Client|
+    endif
+    
+repeat while (Continuer les achats ?) is (Oui)
+-> Non;
+
+|🛒 Client|
+:🛍️ Accéder au panier;
+
+|🏪 Boutique|
+:Afficher le récapitulatif du panier;
+
+note right
+    **Récapitulatif :**
+    ┌─────────────────────┐
+    │ Produit A  x2  50€ │
+    │ Produit B  x1  30€ │
+    ├─────────────────────┤
+    │ **TOTAL : 80€**    │
+    └─────────────────────┘
+end note
+
+|🛒 Client|
+if (Panier OK ?) then (Non)
+    :Modifier les quantités;
+    :Supprimer des articles;
+else (Oui)
+    :Procéder au paiement;
+endif
+
+|🏪 Boutique|
+:Demander l'adresse de livraison;
+
+|🛒 Client|
+:Saisir / Confirmer l'adresse;
+
+|📋 Gestion Commandes|
+fork
+    :Calculer le montant total;
+fork again
+    :Vérifier les informations client;
+end fork
+
+|📦 Gestion Stock|
+:Réserver le stock pour chaque article;
+
+if (Réservation réussie ?) then (Oui)
+    
+    |📋 Gestion Commandes|
+    :📋 Créer la commande;
+    
+    note right
+        **Commande créée :**
+        • N° : CMD-2024-0042
+        • Statut : EN_ATTENTE
+        • Date : 28/12/2024
+        • Montant : 80€
+    end note
+    
+    :📧 Envoyer confirmation par email;
+    
+    |🛒 Client|
+    :✅ Recevoir la confirmation;
+    :🎉 "Commande passée avec succès !";
+    
+else (Non)
+    
+    |📋 Gestion Commandes|
+    :❌ Annuler la transaction;
+    
+    |🏪 Boutique|
+    :Afficher erreur de stock;
+    
+    |🛒 Client|
+    :Retourner au panier\npour ajuster;
+    stop
+    
+endif
+
+stop
+
+legend right
+    **Règles métier :**
+    ════════════════════════════
+    • Stock vérifié à l'ajout au panier
+    • Stock réservé à la confirmation
+    • Email de confirmation automatique
+    • Commande créée en statut EN_ATTENTE
+endlegend
+
+@enduml

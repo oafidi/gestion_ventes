@@ -1,0 +1,157 @@
+@startuml DA04 - Inscription Produit Vendeur
+
+!theme plain
+title <size:20>**DA04 - Inscription d'un Produit par le Vendeur**</size>\n<size:14>//Soumission d'une offre sur un produit du catalogue//</size>
+
+skinparam backgroundColor #FEFEFE
+skinparam ActivityBackgroundColor #E3F2FD
+skinparam ActivityBorderColor #1976D2
+skinparam ActivityDiamondBackgroundColor #FFF3E0
+skinparam ActivityDiamondBorderColor #F57C00
+skinparam ArrowColor #1976D2
+
+|#E1BEE7| 🏪 Vendeur |
+|#E3F2FD| 📦 Catalogue Produits |
+|#E8F5E9| 📋 Gestion Offres |
+|#FFF3E0| 🛡️ Administration |
+
+start
+
+|🏪 Vendeur|
+:Accéder à l'espace vendeur;
+
+if (Vendeur approuvé ?) then (Non)
+    :❌ Accès refusé;
+    :Afficher "En attente d'approbation";
+    stop
+else (Oui)
+endif
+
+:Cliquer sur "Inscrire un produit";
+
+|📦 Catalogue Produits|
+:Charger les produits du catalogue;
+:Afficher la liste des produits disponibles;
+
+|🏪 Vendeur|
+:Parcourir le catalogue;
+
+note right
+    **Produits affichés :**
+    • iPhone 15 Pro
+    • Samsung Galaxy S24
+    • MacBook Air M3
+    • etc.
+end note
+
+:Sélectionner un produit à vendre;
+
+|📋 Gestion Offres|
+:Vérifier si le vendeur vend déjà ce produit;
+
+if (Produit déjà inscrit ?) then (Oui)
+    :⚠️ Afficher message\n"Vous vendez déjà ce produit";
+    
+    |🏪 Vendeur|
+    if (Modifier l'offre existante ?) then (Oui)
+        :Accéder à la modification;
+    else (Non)
+        :Choisir un autre produit;
+    endif
+    stop
+else (Non)
+endif
+
+|🏪 Vendeur|
+:📝 Remplir le formulaire d'offre;
+
+note right
+    **Informations de l'offre :**
+    ┌────────────────────────────┐
+    │ 💰 Mon prix : 1099€        │
+    │ 📝 Titre : iPhone 15 Pro   │
+    │    - Excellent état        │
+    │ 📄 Description : ...       │
+    │ 🖼️ Photo : [optionnel]     │
+    │ 📦 Ma quantité : 10        │
+    └────────────────────────────┘
+end note
+
+:Valider et soumettre l'offre;
+
+|📋 Gestion Offres|
+:Valider les informations;
+
+if (Prix valide ?) then (Non)
+    :❌ Erreur : Prix invalide;
+    |🏪 Vendeur|
+    :Corriger le prix;
+    stop
+else (Oui)
+endif
+
+:📋 Créer l'offre (VendeurProduit);
+
+note right
+    **Offre créée :**
+    • Vendeur : [ID vendeur]
+    • Produit : iPhone 15 Pro
+    • Prix : 1099€
+    • **Statut : EN_ATTENTE**
+    • Date : 28/12/2024
+end note
+
+|🛡️ Administration|
+:📧 Notification : Nouvelle offre à valider;
+
+|📋 Gestion Offres|
+#LightYellow:⏳ En attente d'approbation;
+
+|🏪 Vendeur|
+:✅ Confirmation de soumission;
+:Afficher "Offre en cours de validation";
+
+note right
+    Le vendeur peut :
+    • Suivre l'état de sa demande
+    • Modifier son offre
+    • Supprimer sa demande
+end note
+
+' Partie validation admin
+|🛡️ Administration|
+:Examiner l'offre soumise;
+
+if (Offre conforme ?) then (Oui)
+    
+    |📋 Gestion Offres|
+    :Statut → APPROUVÉE;
+    :Rendre visible en boutique;
+    
+    |🏪 Vendeur|
+    :📧 Notification\n"Offre approuvée !";
+    :🎉 Produit visible en boutique;
+    
+else (Non)
+    
+    |📋 Gestion Offres|
+    :Statut → REJETÉE;
+    :Enregistrer le motif de rejet;
+    
+    |🏪 Vendeur|
+    :📧 Notification\n"Offre rejetée"\nMotif : ...;
+    
+endif
+
+stop
+
+legend right
+    **Règles métier :**
+    ═══════════════════════════════
+    • Vendeur doit être approuvé
+    • Une seule offre par produit
+    • Chaque offre nécessite validation
+    • Prix librement défini par vendeur
+endlegend
+
+@enduml

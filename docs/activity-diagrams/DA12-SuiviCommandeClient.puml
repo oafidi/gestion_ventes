@@ -1,0 +1,194 @@
+@startuml DA12 - Suivi Commande Client
+
+!theme plain
+title <size:20>**DA12 - Suivi de Commande par le Client**</size>\n<size:14>//Consultation et gestion des commandes//</size>
+
+skinparam backgroundColor #FEFEFE
+skinparam ActivityBackgroundColor #E3F2FD
+skinparam ActivityBorderColor #1976D2
+skinparam ActivityDiamondBackgroundColor #FFF3E0
+skinparam ActivityDiamondBorderColor #F57C00
+skinparam ArrowColor #1976D2
+
+|#FFF3E0| 🛒 Client |
+|#E3F2FD| 📋 Mes Commandes |
+|#E8F5E9| 🚚 Suivi Livraison |
+
+start
+
+|🛒 Client|
+:Se connecter à son compte;
+:Accéder à "Mes commandes";
+
+|📋 Mes Commandes|
+:Charger l'historique des commandes;
+:Afficher la liste des commandes;
+
+note right
+    **Historique :**
+    ┌───────────────────────────────┐
+    │ 📋 #0042 - 28/12/2024         │
+    │    💰 150€  🔵 En livraison   │
+    ├───────────────────────────────┤
+    │ 📋 #0038 - 20/12/2024         │
+    │    💰 89€   ✅ Livrée         │
+    ├───────────────────────────────┤
+    │ 📋 #0035 - 15/12/2024         │
+    │    💰 245€  ✅ Livrée         │
+    └───────────────────────────────┘
+end note
+
+|🛒 Client|
+:Sélectionner une commande;
+
+|📋 Mes Commandes|
+:Afficher les détails de la commande;
+
+note right
+    **Commande #0042 :**
+    ════════════════════════════
+    📅 28/12/2024 à 14h30
+    🔵 EN COURS DE LIVRAISON
+    ════════════════════════════
+    📦 **Articles :**
+    • iPhone 15 Pro x1 → 1099€
+    • Coque MagSafe x1 → 51€
+    ════════════════════════════
+    **TOTAL : 150€**
+    ════════════════════════════
+    📍 Livraison :
+    123 Rue de Paris
+    75001 Paris
+    ════════════════════════════
+end note
+
+|🛒 Client|
+switch (Action souhaitée ?)
+
+case (🚚 Suivre la livraison)
+    
+    |🚚 Suivi Livraison|
+    :Afficher le tracking en temps réel;
+    
+    note right
+        **Suivi du colis :**
+        
+        ✅ 28/12 14h30
+           Commande passée
+              │
+        ✅ 28/12 15h00
+           Commande confirmée
+              │
+        ✅ 29/12 09h00
+           Colis expédié
+              │
+        🔵 29/12 14h00
+           En transit
+           Dépôt régional Paris
+              │
+        ⏳ 30/12 (prévu)
+           Livraison
+    end note
+    
+    |🛒 Client|
+    :Consulter la position du colis;
+
+case (❌ Demander annulation)
+    
+    |📋 Mes Commandes|
+    :Vérifier le statut actuel;
+    
+    if (Statut = EN_ATTENTE ou CONFIRMÉE ?) then (Oui)
+        
+        |🛒 Client|
+        :Confirmer la demande d'annulation;
+        
+        |📋 Mes Commandes|
+        :Traiter l'annulation;
+        
+        fork
+            :Changer statut → ANNULÉE;
+        fork again
+            :Restaurer le stock;
+        fork again
+            :Initier le remboursement;
+        end fork
+        
+        |🛒 Client|
+        :📧 Confirmation d'annulation;
+        :✅ "Remboursement sous 5-7 jours";
+        
+    else (Non - Déjà expédiée)
+        
+        :❌ Annulation impossible;
+        
+        note right
+            **Message :**
+            "Votre colis est déjà en route.
+            Contactez le service client
+            pour toute réclamation."
+        end note
+        
+        |🛒 Client|
+        :Contacter le support si nécessaire;
+        
+    endif
+
+case (🔄 Recommander)
+    
+    |📋 Mes Commandes|
+    :Copier les articles dans le panier;
+    
+    |🛒 Client|
+    :Vérifier les disponibilités;
+    :Procéder à une nouvelle commande;
+    
+    note right
+        → Voir DA02
+        Processus de commande
+    end note
+
+case (⭐ Donner un avis)
+    
+    if (Commande livrée ?) then (Oui)
+        |🛒 Client|
+        :Accéder au formulaire d'avis;
+        
+        note right
+            → Voir DA06
+            Processus d'avis
+        end note
+    else (Non)
+        :⚠️ Avis possible après livraison;
+    endif
+
+case (📄 Télécharger facture)
+    
+    |📋 Mes Commandes|
+    :Générer la facture PDF;
+    
+    |🛒 Client|
+    :📄 Télécharger la facture;
+
+endswitch
+
+|🛒 Client|
+:Retour à l'historique;
+
+if (Autre action ?) then (Oui)
+else (Non)
+    :Quitter l'espace commandes;
+endif
+
+stop
+
+legend right
+    **Règles métier :**
+    ══════════════════════════════════
+    • Annulation avant expédition only
+    • Suivi en temps réel disponible
+    • Avis après livraison uniquement
+    • Facture téléchargeable
+endlegend
+
+@enduml

@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from models.classes import Product, SearchQuery, CollabInput
+from models.classes import Product, SearchQuery, CollabInput, ChatMessage
 from semantic_search import get_top_products, add_or_update_product, get_top_products_by_image
 from collaborative_filtering import recommendation_system
+from customer_support import ask
 
 app = FastAPI()
 
@@ -30,3 +31,22 @@ def get_products_image(url: SearchQuery):
 @app.post("/collaborative_filtering")
 def get_similar_clients(collab_input : CollabInput):
     return {"similiar_clients_ids":recommendation_system(collab_input.collab_filtered_data, collab_input.client_id, collab_input.k)}
+
+# ==================== CUSTOMER SUPPORT ENDPOINT ====================
+
+@app.post("/support/ask")
+def ask_support(chat_message: ChatMessage):
+    """
+    Pose une question au support - cherche dans les FAQs ET les produits.
+    
+    Request body:
+    - message: La question de l'utilisateur
+    
+    Response:
+    - found: Si une réponse a été trouvée
+    - answer: La réponse
+    - confidence: Score de confiance (0-1)
+    - source_type: "faq" ou "product"
+    - sources: Liste des sources trouvées avec leur contenu
+    """
+    return ask(chat_message.message)

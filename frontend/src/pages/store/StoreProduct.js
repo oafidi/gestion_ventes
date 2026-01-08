@@ -4,6 +4,7 @@ import { useCart } from '../../context/CartContext';
 import { StoreHeader, StoreFooter, CartSidebar } from './StoreHome';
 import storeService from '../../services/storeService';
 import { getImageUrl } from '../../config/apiConfig';
+import SupportChat from '../../components/store/SupportChat';
 import { 
   FiShoppingCart, 
   FiShoppingBag, 
@@ -645,6 +646,7 @@ const StoreProduct = () => {
 
       <StoreFooter />
       <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      <SupportChat />
     </div>
   );
 };

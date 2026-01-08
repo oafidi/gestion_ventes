@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import storeService from '../../services/storeService';
 import { getImageUrl } from '../../config/apiConfig';
+import SupportChat from '../../components/store/SupportChat';
 import { 
   FiShoppingCart, 
   FiUser, 
@@ -485,6 +486,9 @@ const StoreHome = () => {
       
       {/* Cart Sidebar */}
       <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+
+      {/* Support Chat */}
+      <SupportChat />
     </div>
   );
 };

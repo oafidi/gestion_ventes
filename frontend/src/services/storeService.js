@@ -280,6 +280,23 @@ const storeService = {
       return [];
     }
   },
+
+  // ========== Customer Support Chat ==========
+
+  // Poser une question au support client AI
+  askSupport: async (message) => {
+    try {
+      const response = await aiApi.post('/support/ask', { message });
+      return response.data;
+    } catch (error) {
+      console.error('Erreur support client:', error);
+      return {
+        found: false,
+        answer: "Désolé, une erreur s'est produite. Veuillez réessayer plus tard.",
+        sources: []
+      };
+    }
+  },
 };
 
 export default storeService;

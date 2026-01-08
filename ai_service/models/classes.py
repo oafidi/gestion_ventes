@@ -31,4 +31,9 @@ class SearchQuery(BaseModel):
 class CollabInput(BaseModel):
     collab_filtered_data: Dict[str, List]
     client_id: int
-    k: Optional[int] = 3
+    k: Optional[int] = 2
+
+
+# Customer Support Model
+class ChatMessage(BaseModel):
+    message: str

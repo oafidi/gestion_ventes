@@ -4,6 +4,7 @@ import { useCart } from '../../context/CartContext';
 import { StoreHeader, StoreFooter, CartSidebar } from './StoreHome';
 import storeService from '../../services/storeService';
 import { getImageUrl } from '../../config/apiConfig';
+import SupportChat from '../../components/store/SupportChat';
 import { FiShoppingCart, FiShoppingBag, FiTag, FiInbox, FiCheck, FiX } from 'react-icons/fi';
 import '../../styles/Store.css';
 
@@ -354,6 +355,7 @@ const StoreShop = () => {
 
       <StoreFooter />
       <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+      <SupportChat />
     </div>
   );
 };

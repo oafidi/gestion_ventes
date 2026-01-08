@@ -22,6 +22,8 @@ def recommendation_system(collab_filtered_data, client_id, k=1):
     users = list(df.index)
     cosine_matrix = pd.DataFrame(float(0), index=users, columns=users)
     cosine_matrix = cosine_matrix.apply(fn, args=(df, users), axis=1)
+    print("client_id:", client_id)
+    print("leurs similaires: ",list(cosine_matrix.loc[client_id].drop(client_id).sort_values(ascending=False)[:k].index))
     return list(cosine_matrix.loc[client_id].drop(client_id).sort_values(ascending=False)[:k].index)
 
 if __name__=="__main__":

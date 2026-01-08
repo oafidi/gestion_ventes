@@ -1,12 +1,12 @@
 import axios from 'axios';
-
-const API_URL = 'http://localhost:8080/api';
+import { API_URL } from '../config/apiConfig';
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Envoyer les cookies avec les requêtes
 });
 
 // Intercepteur pour ajouter le token aux requêtes (optionnel pour le store)
@@ -93,7 +93,7 @@ const storeService = {
 
   // Debug - vérifier l'authentification actuelle
   debugAuth: async () => {
-    const response = await api.get('/auth/debug');
+    const response = await api.get('/client/debug');
     return response.data;
   },
 
@@ -114,6 +114,58 @@ const storeService = {
   // Ajouter un avis (authentifié)
   ajouterAvis: async (avisData) => {
     const response = await api.post('/avis', avisData);
+    return response.data;
+  },
+
+  // ========== Panier ==========
+
+  // Récupérer le panier du client (authentifié)
+  getPanier: async () => {
+    const response = await api.get('/client/panier');
+    return response.data;
+  },
+
+  // Ajouter un produit au panier (authentifié)
+  ajouterAuPanier: async (vendeurProduitId, quantite = 1) => {
+    const response = await api.post('/client/panier/ajouter', {
+      vendeurProduitId,
+      quantite
+    });
+    return response.data;
+  },
+
+  // Modifier la quantité d'un produit dans le panier (authentifié)
+  modifierQuantitePanier: async (vendeurProduitId, quantite) => {
+    const response = await api.put('/client/panier/modifier', {
+      vendeurProduitId,
+      quantite
+    });
+    return response.data;
+  },
+
+  // Supprimer un produit du panier (authentifié)
+  supprimerDuPanier: async (vendeurProduitId) => {
+    const response = await api.delete(`/client/panier/produit/${vendeurProduitId}`);
+    return response.data;
+  },
+
+  // Vider le panier (authentifié)
+  viderPanier: async () => {
+    const response = await api.delete('/client/panier/vider');
+    return response.data;
+  },
+
+  // ========== Profil Client ==========
+
+  // Mettre à jour le profil du client (authentifié)
+  updateProfil: async (profilData) => {
+    const response = await api.put('/client/profil', profilData);
+    return response.data;
+  },
+
+  // Récupérer le profil du client (authentifié)
+  getProfil: async () => {
+    const response = await api.get('/client/profil');
     return response.data;
   },
 };

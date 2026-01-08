@@ -1,0 +1,110 @@
+@startuml DS02 - Passer Commande
+
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam sequenceMessageAlign center
+
+title DS02 - Processus de Commande
+
+actor Client as C
+boundary "<<boundary>>\nBoutiquePage" as BP
+boundary "<<boundary>>\nPanierPage" as PP
+control "<<control>>\nCommandeController" as CC
+entity "<<entity>>\nProduit" as P
+entity "<<entity>>\nPanier" as PA
+entity "<<entity>>\nCommande" as CMD
+entity "<<entity>>\nLigneCommande" as LC
+
+== Navigation et Selection ==
+
+C -> BP : consulterCatalogue()
+activate BP
+BP -> P : findAllDisponibles()
+activate P
+P --> BP : listeProduits
+deactivate P
+BP --> C : afficherProduits(listeProduits)
+deactivate BP
+
+C -> BP : consulterProduit(produitId)
+activate BP
+BP -> P : findById(produitId)
+activate P
+P --> BP : produit
+deactivate P
+BP --> C : afficherFicheProduit(produit)
+deactivate BP
+
+== Constitution du Panier ==
+
+C -> PP : ajouterAuPanier(produitId, quantite)
+activate PP
+PP -> P : findById(produitId)
+activate P
+P --> PP : produit
+deactivate P
+
+alt quantite > produit.stock
+    PP --> C : erreur("Stock insuffisant")
+else stock disponible
+    PP -> PA : ajouterLigne(produit, quantite)
+    activate PA
+    PA --> PP : panierMisAJour
+    deactivate PA
+    PP --> C : succes("Produit ajoute")
+end
+deactivate PP
+
+C -> PP : consulterPanier()
+activate PP
+PP -> PA : getContenu()
+activate PA
+PA --> PP : lignesPanier
+deactivate PA
+PP --> C : afficherPanier(lignesPanier, total)
+deactivate PP
+
+== Validation de la Commande ==
+
+C -> PP : validerCommande()
+activate PP
+PP --> C : afficherFormulaireAdresse()
+deactivate PP
+
+C -> CC : passerCommande(adresse, telephone)
+activate CC
+CC -> PA : getContenu()
+activate PA
+PA --> CC : lignesPanier
+deactivate PA
+
+CC -> CMD : create(client, adresse, telephone)
+activate CMD
+CMD --> CC : commande
+deactivate CMD
+
+loop pour chaque lignePanier
+    CC -> LC : create(commande, produit, quantite, prix)
+    activate LC
+    LC --> CC : ligneCommande
+    deactivate LC
+    CC -> P : decrementerStock(produitId, quantite)
+    activate P
+    P --> CC : stockMisAJour
+    deactivate P
+end
+
+CC -> CMD : save(commande)
+activate CMD
+CMD --> CC : commandeEnregistree
+deactivate CMD
+
+CC -> PA : vider()
+activate PA
+PA --> CC : panierVide
+deactivate PA
+
+CC --> C : confirmerCommande(numeroCommande)
+deactivate CC
+
+@enduml

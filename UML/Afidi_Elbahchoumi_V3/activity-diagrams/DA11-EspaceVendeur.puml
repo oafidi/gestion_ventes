@@ -1,0 +1,54 @@
+@startuml DA11 - Espace Vendeur
+
+title DA11 - Espace Vendeur
+
+start
+
+:Se connecter a la plateforme;
+
+if (Compte approuve ?) then (non)
+    :Afficher page d'attente;
+    stop
+else (oui)
+endif
+
+:Acceder a l'espace vendeur;
+:Afficher tableau de bord;
+
+switch (Action ?)
+
+case (Gerer mes produits)
+    :Afficher liste des offres;
+    
+    switch (Action sur offre ?)
+    case (Nouvelle offre)
+        :Inscrire un nouveau produit;
+    case (Modifier)
+        :Selectionner une offre;
+        :Modifier prix ou description;
+        :estApprouve = false;
+        :Afficher "En attente de validation";
+    case (Supprimer)
+        :Selectionner une offre;
+        :Confirmer suppression;
+        :Supprimer l'offre;
+    endswitch
+
+case (Consulter mes avis)
+    :Afficher liste des avis recus;
+    
+    if (Avis inapproprie ?) then (oui)
+        :Demander masquage;
+        :estCache = true;
+    endif
+
+case (Voir statistiques)
+    :Afficher statistiques de ventes;
+    :Afficher chiffre d'affaires;
+    :Afficher produits les plus vendus;
+
+endswitch
+
+stop
+
+@enduml

@@ -1,0 +1,105 @@
+@startuml DS08 - Consultation Catalogue
+
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam sequenceMessageAlign center
+
+title DS08 - Navigation dans la Boutique
+
+actor Visiteur as V
+boundary "<<boundary>>\nBoutiquePage" as BP
+control "<<control>>\nCatalogueController" as CC
+entity "<<entity>>\nCategorie" as CAT
+entity "<<entity>>\nProduit" as P
+entity "<<entity>>\nVendeurProduit" as VP
+entity "<<entity>>\nAvis" as A
+
+== Accueil Boutique ==
+
+V -> BP : accederBoutique()
+activate BP
+BP -> CC : getAccueil()
+activate CC
+CC -> CAT : findAll()
+activate CAT
+CAT --> CC : listeCategories
+deactivate CAT
+CC -> P : findTopVentes(limit)
+activate P
+P --> CC : produitsPopulaires
+deactivate P
+CC --> BP : accueilData(categories, produitsPopulaires)
+deactivate CC
+BP --> V : afficherAccueil(categories, produitsPopulaires)
+deactivate BP
+
+== Navigation par Categorie ==
+
+V -> BP : consulterCategorie(categorieId)
+activate BP
+BP -> CC : getProduitsParCategorie(categorieId)
+activate CC
+CC -> VP : findByCategorieIdAndEstApprouve(categorieId, true)
+activate VP
+VP --> CC : produitsApprouves
+deactivate VP
+CC --> BP : produitsApprouves
+deactivate CC
+BP --> V : afficherProduits(produitsApprouves)
+deactivate BP
+
+== Recherche ==
+
+V -> BP : rechercher(motCle)
+activate BP
+BP -> CC : searchProduits(motCle)
+activate CC
+CC -> P : findByNomContaining(motCle)
+activate P
+P --> CC : resultats
+deactivate P
+CC --> BP : resultats
+deactivate CC
+BP --> V : afficherResultats(resultats)
+deactivate BP
+
+== Fiche Produit ==
+
+V -> BP : consulterProduit(produitId)
+activate BP
+BP -> CC : getProduitDetail(produitId)
+activate CC
+CC -> P : findById(produitId)
+activate P
+P --> CC : produit
+deactivate P
+CC -> VP : findByProduitIdAndEstApprouve(produitId, true)
+activate VP
+VP --> CC : offresVendeurs
+deactivate VP
+CC -> A : findByProduitId(produitId)
+activate A
+A --> CC : avis
+deactivate A
+CC --> BP : produitDetail(produit, offres, avis)
+deactivate CC
+BP --> V : afficherFicheProduit(produit, offres, avis)
+deactivate BP
+
+== Ajout au Panier ==
+
+V -> BP : ajouterAuPanier(vendeurProduitId, quantite)
+activate BP
+
+alt visiteur non connecte
+    BP --> V : redirigerVersConnexion()
+else visiteur connecte
+    BP -> CC : ajouterAuPanier(clientId, vendeurProduitId, quantite)
+    activate CC
+    CC --> BP : succes
+    deactivate CC
+    BP --> V : afficherConfirmation("Produit ajoute au panier")
+end
+deactivate BP
+
+@enduml

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import vendeurProduitService from '../../services/vendeurProduitService';
+import ConfirmModal from '../../components/ConfirmModal';
+import { BACKEND_URL } from '../../config/apiConfig';
 import './Inscriptions.css';
-
-const API_BASE_URL = 'http://localhost:8080';
 
 const Inscriptions = () => {
   const [inscriptions, setInscriptions] = useState([]);
@@ -13,6 +13,10 @@ const Inscriptions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedInscription, setSelectedInscription] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  
+  // États pour la modale de confirmation
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmAction, setConfirmAction] = useState({ type: '', id: null, title: '', message: '' });
 
   // Charger les inscriptions
   const fetchInscriptions = async () => {
@@ -47,31 +51,44 @@ const Inscriptions = () => {
   };
 
   // Bannir une inscription
-  const handleBannirInscription = async (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir bannir cette inscription ?')) {
-      try {
-        await vendeurProduitService.bannirInscription(id);
-        setSuccess('Inscription bannie');
-        fetchInscriptions();
-        setTimeout(() => setSuccess(null), 3000);
-      } catch (err) {
-        setError('Erreur lors du bannissement');
-      }
-    }
+  const handleBannirInscription = (id) => {
+    setConfirmAction({
+      type: 'bannir',
+      id,
+      title: 'Bannir l\'inscription',
+      message: 'Êtes-vous sûr de vouloir bannir cette inscription ?'
+    });
+    setShowConfirmModal(true);
   };
 
   // Supprimer une inscription
-  const handleSupprimerInscription = async (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette inscription ?')) {
-      try {
-        await vendeurProduitService.rejeterInscription(id);
+  const handleSupprimerInscription = (id) => {
+    setConfirmAction({
+      type: 'supprimer',
+      id,
+      title: 'Supprimer l\'inscription',
+      message: 'Êtes-vous sûr de vouloir supprimer cette inscription ?'
+    });
+    setShowConfirmModal(true);
+  };
+
+  // Confirmer l'action
+  const confirmInscriptionAction = async () => {
+    try {
+      if (confirmAction.type === 'bannir') {
+        await vendeurProduitService.bannirInscription(confirmAction.id);
+        setSuccess('Inscription bannie');
+      } else if (confirmAction.type === 'supprimer') {
+        await vendeurProduitService.rejeterInscription(confirmAction.id);
         setSuccess('Inscription supprimée');
-        fetchInscriptions();
-        setTimeout(() => setSuccess(null), 3000);
-      } catch (err) {
-        setError('Erreur lors de la suppression');
       }
+      fetchInscriptions();
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError(`Erreur lors de l'opération`);
     }
+    setShowConfirmModal(false);
+    setConfirmAction({ type: '', id: null, title: '', message: '' });
   };
 
   // Voir les détails d'une inscription
@@ -88,13 +105,13 @@ const Inscriptions = () => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
     if (imagePath.startsWith('http')) return imagePath;
-    return `${API_BASE_URL}${imagePath}`;
+    return `${BACKEND_URL}${imagePath}`;
   };
 
   const formatPrice = (prix) => {
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat('fr-MA', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'MAD'
     }).format(prix);
   };
 
@@ -355,6 +372,16 @@ const Inscriptions = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={confirmInscriptionAction}
+        title={confirmAction.title}
+        message={confirmAction.message}
+        confirmText={confirmAction.type === 'bannir' ? 'Bannir' : 'Supprimer'}
+        type="danger"
+      />
     </div>
   );
 };

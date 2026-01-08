@@ -1,0 +1,81 @@
+@startuml DiagrammeDeClasses-Simplifie
+
+title Diagramme de Classes Simplifié - Version 1\nGestion des Ventes (sans attributs ni méthodes)
+
+skinparam classAttributeIconSize 0
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam shadowing false
+
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+}
+
+' ============================================
+' CLASSES UTILISATEURS (Héritage)
+' ============================================
+
+abstract class Utilisateur
+
+class Client
+class Admin
+class Vendeur
+
+Utilisateur <|-- Client
+Utilisateur <|-- Admin
+Utilisateur <|-- Vendeur
+
+' ============================================
+' CLASSE ALERTE
+' ============================================
+
+class Alerte
+
+Utilisateur "1" -- "0..*" Alerte : reçoit >
+
+' ============================================
+' CLASSES CATALOGUE
+' ============================================
+
+class Categorie
+class Produit
+class OffreProduit
+
+Categorie "1" -- "0..*" Produit : contient >
+Produit "1" -- "0..*" OffreProduit : propose >
+Vendeur "1" -- "0..*" OffreProduit : commercialise >
+
+' ============================================
+' CLASSES PANIER
+' ============================================
+
+class Panier
+class LignePanier
+
+Client "1" -- "1" Panier : possède >
+Panier "1" -- "0..*" LignePanier : contient >
+LignePanier "0..*" -- "1" OffreProduit : concerne >
+
+' ============================================
+' CLASSES COMMANDE
+' ============================================
+
+class Commande
+class LigneCommande
+
+Client "1" -- "0..*" Commande : passe >
+Commande "1" -- "1..*" LigneCommande : contient >
+LigneCommande "0..*" -- "1" OffreProduit : concerne >
+
+' ============================================
+' CLASSE AVIS
+' ============================================
+
+class Avis
+
+Client "1" -- "0..*" Avis : rédige >
+Avis "0..*" -- "1" OffreProduit : concerne >
+
+@enduml

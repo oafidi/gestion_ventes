@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import produitService from '../../services/produitService';
 import categorieService from '../../services/categorieService';
+import ConfirmModal from '../../components/ConfirmModal';
+import { BACKEND_URL } from '../../config/apiConfig';
 import './Produits.css';
-
-const API_BASE_URL = 'http://localhost:8080';
 
 const Produits = () => {
   const [produits, setProduits] = useState([]);
@@ -24,6 +24,10 @@ const Produits = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategorie, setFilterCategorie] = useState('');
   const fileInputRef = useRef(null);
+  
+  // États pour la modale de confirmation
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [produitToDelete, setProduitToDelete] = useState(null);
 
   // Charger les produits et les catégories
   const fetchData = async () => {
@@ -74,7 +78,7 @@ const Produits = () => {
       categorieId: produit.categorie?.id || ''
     });
     setImageFile(null);
-    setImagePreview(produit.image ? `${API_BASE_URL}${produit.image}` : null);
+    setImagePreview(produit.image ? `${BACKEND_URL}${produit.image}` : null);
     setShowModal(true);
   };
 
@@ -101,16 +105,23 @@ const Produits = () => {
   };
 
   // Supprimer un produit
-  const handleDelete = async (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+  const handleDelete = (id) => {
+    setProduitToDelete(id);
+    setShowConfirmModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (produitToDelete) {
       try {
-        await produitService.deleteProduit(id);
+        await produitService.deleteProduit(produitToDelete);
         fetchData();
       } catch (err) {
         setError('Erreur lors de la suppression');
         console.error(err);
       }
     }
+    setShowConfirmModal(false);
+    setProduitToDelete(null);
   };
 
   // Soumettre le formulaire
@@ -167,14 +178,14 @@ const Produits = () => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
     if (imagePath.startsWith('http')) return imagePath;
-    return `${API_BASE_URL}${imagePath}`;
+    return `${BACKEND_URL}${imagePath}`;
   };
 
   // Formater le prix
   const formatPrice = (prix) => {
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat('fr-MA', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'MAD'
     }).format(prix);
   };
 
@@ -378,7 +389,7 @@ const Produits = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="prix">Prix (€) *</label>
+                  <label htmlFor="prix">Prix (DH) *</label>
                   <input
                     type="number"
                     id="prix"
@@ -447,6 +458,16 @@ const Produits = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={confirmDelete}
+        title="Supprimer le produit"
+        message="Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible."
+        confirmText="Supprimer"
+        type="danger"
+      />
     </div>
   );
 };

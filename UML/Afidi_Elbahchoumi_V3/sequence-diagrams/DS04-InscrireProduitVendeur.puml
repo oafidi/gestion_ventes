@@ -1,0 +1,80 @@
+@startuml DS04 - Inscrire Produit Vendeur
+
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam sequenceMessageAlign center
+
+title DS04 - Inscription d'un Produit par le Vendeur
+
+actor Vendeur as V
+boundary "<<boundary>>\nEspaceVendeurPage" as EVP
+control "<<control>>\nVendeurProduitController" as VPC
+entity "<<entity>>\nProduit" as P
+entity "<<entity>>\nVendeurProduit" as VP
+
+== Selection du Produit ==
+
+V -> EVP : accederInscriptionProduit()
+activate EVP
+EVP -> VPC : getProduitsDisponibles()
+activate VPC
+VPC -> P : findAllActifs()
+activate P
+P --> VPC : listeProduits
+deactivate P
+VPC --> EVP : listeProduits
+deactivate VPC
+EVP --> V : afficherCatalogueProduits(listeProduits)
+deactivate EVP
+
+V -> EVP : selectionnerProduit(produitId)
+activate EVP
+EVP -> VPC : getProduitDetails(produitId)
+activate VPC
+VPC -> P : findById(produitId)
+activate P
+P --> VPC : produit
+deactivate P
+VPC --> EVP : produit
+deactivate VPC
+EVP --> V : afficherFormulaireOffre(produit)
+deactivate EVP
+
+== Creation de l'Offre ==
+
+V -> EVP : soumettreOffre(produitId, prix, description)
+activate EVP
+EVP -> VPC : creerOffre(vendeurId, produitId, prix, description)
+activate VPC
+
+VPC -> VP : findByVendeurAndProduit(vendeurId, produitId)
+activate VP
+VP --> VPC : offreExistante
+deactivate VP
+
+alt offre existe deja
+    VPC --> EVP : erreur("Vous vendez deja ce produit")
+    EVP --> V : afficherErreur("Offre existante")
+else nouvelle offre
+    VPC -> VP : create(vendeur, produit, prix, description)
+    activate VP
+    VP --> VPC : nouvelleOffre
+    deactivate VP
+    
+    VPC -> VP : setEstApprouve(false)
+    activate VP
+    VP --> VPC : offreEnAttente
+    deactivate VP
+    
+    VPC -> VP : save(offre)
+    activate VP
+    VP --> VPC : offreSauvegardee
+    deactivate VP
+    
+    VPC --> EVP : succes(offre)
+    deactivate VPC
+    EVP --> V : afficherConfirmation("Offre soumise, en attente de validation")
+    deactivate EVP
+end
+
+@enduml

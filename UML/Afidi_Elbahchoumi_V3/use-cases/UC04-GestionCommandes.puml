@@ -1,0 +1,118 @@
+@startuml UC04 - Gestion des Commandes
+
+' Style StarUML
+left to right direction
+skinparam backgroundColor White
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+
+skinparam actor {
+    BackgroundColor White
+    BorderColor Black
+}
+
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+    BorderThickness 1
+}
+
+skinparam rectangle {
+    BackgroundColor White
+    BorderColor Black
+    BorderThickness 2
+    RoundCorner 10
+}
+
+skinparam padding 20
+skinparam nodesep 50
+skinparam ranksep 40
+
+
+actor Client as C
+actor Vendeur as V
+actor Admin as A
+
+rectangle "Gestion des Commandes" {
+    ' === Client - Panier ===
+    (Consulter un produit ) as UC30
+    (Ajouter au panier) as UC1
+    (Consulter le panier) as UC2
+    (Modifier la quantite) as UC3
+    (Supprimer du panier) as UC4
+    (Vider le panier) as UC5
+    
+    ' === Client - Commande ===
+    (Passer une commande) as UC6
+    
+    (Saisir adresse de livraison et le contact) as UC7
+    (Consulter mes commandes) as UC9
+    (Suivre ma commande) as UC10
+    (Annuler ma commande) as UC11
+    
+    ' === Vendeur ===
+    (Consulter mes ventes) as UC12
+
+    (Consulter statistiques ventes) as UC14
+    
+    ' === Admin - Gestion ===
+    (Lister les commandes) as UC15
+    (Filtrer les commandes) as UC16
+
+    (Confirmer une commande) as UC18
+    (Expedier une commande) as UC19
+    (Marquer comme livree) as UC20
+    (Annuler une commande) as UC21
+    
+    ' === Admin - Actions systeme ===
+    (Notifier le client) as UC22
+    (Restaurer le stock) as UC23
+    (Consulter statistiques globales) as UC24
+    (Generer rapport de ventes) as UC25
+}
+
+' === Associations Client ===
+
+C -- UC2
+C -- UC6
+C -- UC9
+C -- UC30
+
+' === Associations Vendeur ===
+V -- UC12
+V -- UC14
+
+' === Associations Admin ===
+A -- UC15
+A -- UC18
+A -- UC19
+A -- UC20
+A -- UC21
+A -- UC24
+A -- UC25
+
+' === Relations Client - Panier (base a gauche, extend a droite) ===
+UC2 ..> UC3 : <<extend>>
+UC2 ..> UC4 : <<extend>>
+UC2 ..> UC5 : <<extend>>
+UC30 <.. UC1 : <<extend>>
+' === Relations Client - Commande (base a gauche, include a droite) ===
+UC6 ..> UC7 : <<include>>
+
+UC9 ..> UC10 : <<extend>>
+UC9 ..> UC11 : <<extend>>
+
+
+
+
+' === Relations Admin ===
+UC15 ..> UC16 : <<extend>>
+
+UC18 ..> UC22 : <<include>>
+UC19 ..> UC22 : <<include>>
+UC20 ..> UC22 : <<include>>
+UC21 ..> UC22 : <<include>>
+UC21 ..> UC23 : <<include>>
+
+@enduml

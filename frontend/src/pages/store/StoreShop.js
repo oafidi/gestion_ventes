@@ -3,8 +3,74 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { StoreHeader, StoreFooter, CartSidebar } from './StoreHome';
 import storeService from '../../services/storeService';
+import { getImageUrl } from '../../config/apiConfig';
 import { FiShoppingCart, FiShoppingBag, FiTag, FiInbox, FiCheck, FiX } from 'react-icons/fi';
 import '../../styles/Store.css';
+
+// Composant ProductCard réutilisable
+const ProductCard = ({ product, getImageUrl, handleAddToCart }) => (
+  <div className="store-product-card">
+    <Link to={`/store/product/${product.id}`}>
+      <div className="store-product-image-container">
+        {product.image ? (
+          <img 
+            src={getImageUrl(product.image)} 
+            alt={product.titre || product.produitNom}
+            className="store-product-image"
+          />
+        ) : (
+          <div className="store-product-placeholder"><FiShoppingBag size={60} /></div>
+        )}
+      </div>
+    </Link>
+    <div className="store-product-info">
+      <span className="store-product-category">
+        {product.categorieNom || 'Catégorie'}
+      </span>
+      <Link to={`/store/product/${product.id}`} className="store-product-title">
+        {product.titre || product.produitNom}
+      </Link>
+      {product.description && (
+        <p className="store-product-description">
+          {product.description.length > 60 
+            ? product.description.substring(0, 60) + '...' 
+            : product.description}
+        </p>
+      )}
+      <div className="store-product-vendor">
+        Vendu par <strong>{product.vendeurNom || 'Vendeur'}</strong>
+      </div>
+      <div style={{ 
+        fontSize: '11px', 
+        marginTop: '4px',
+        color: (product.quantiteStock || 0) > 0 ? '#155724' : '#721c24',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px'
+      }}>
+        {(product.quantiteStock || 0) > 0 ? (
+          <><FiCheck size={12} /> En stock</>
+        ) : (
+          <><FiX size={12} /> Épuisé</>
+        )}
+      </div>
+      <div className="store-product-price-row">
+        <span className="store-product-price">
+          {parseFloat(product.prixVendeur).toFixed(2)} DH
+        </span>
+        <button 
+          className="store-add-to-cart-btn"
+          onClick={(e) => handleAddToCart(product, e)}
+          title={(product.quantiteStock || 0) > 0 ? "Ajouter au panier" : "Épuisé"}
+          disabled={(product.quantiteStock || 0) <= 0}
+          style={(product.quantiteStock || 0) <= 0 ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+        >
+          <FiShoppingCart />
+        </button>
+      </div>
+    </div>
+  </div>
+);
 
 const StoreShop = () => {
   const [categories, setCategories] = useState([]);
@@ -83,12 +149,6 @@ const StoreShop = () => {
     }
     return matchesSearch && matchesCategory;
   });
-
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return null;
-    if (imagePath.startsWith('http')) return imagePath;
-    return `http://localhost:8080${imagePath}`;
-  };
 
   if (loading) {
     return (
@@ -175,68 +235,12 @@ const StoreShop = () => {
             ) : (
               <div className="store-products-grid">
                 {filteredProducts.map(product => (
-                  <div key={product.id} className="store-product-card">
-                    <Link to={`/store/product/${product.id}`}>
-                      <div className="store-product-image-container">
-                        {product.image ? (
-                          <img 
-                            src={getImageUrl(product.image)} 
-                            alt={product.titre || product.produitNom}
-                            className="store-product-image"
-                          />
-                        ) : (
-                          <div className="store-product-placeholder"><FiShoppingBag size={60} /></div>
-                        )}
-                      </div>
-                    </Link>
-                    <div className="store-product-info">
-                      <span className="store-product-category">
-                        {product.categorieNom || 'Catégorie'}
-                      </span>
-                      <Link to={`/store/product/${product.id}`} className="store-product-title">
-                        {product.titre || product.produitNom}
-                      </Link>
-                      {product.description && (
-                        <p className="store-product-description">
-                          {product.description.length > 60 
-                            ? product.description.substring(0, 60) + '...' 
-                            : product.description}
-                        </p>
-                      )}
-                      <div className="store-product-vendor">
-                        Vendu par <strong>{product.vendeurNom || 'Vendeur'}</strong>
-                      </div>
-                      {/* Stock indicator */}
-                      <div style={{ 
-                        fontSize: '11px', 
-                        marginTop: '4px',
-                        color: (product.quantiteStock || 0) > 0 ? '#155724' : '#721c24',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}>
-                        {(product.quantiteStock || 0) > 0 ? (
-                          <><FiCheck size={12} /> En stock</>
-                        ) : (
-                          <><FiX size={12} /> Épuisé</>
-                        )}
-                      </div>
-                      <div className="store-product-price-row">
-                        <span className="store-product-price">
-                          {parseFloat(product.prixVendeur).toFixed(2)} DH
-                        </span>
-                        <button 
-                          className="store-add-to-cart-btn"
-                          onClick={(e) => handleAddToCart(product, e)}
-                          title={product.quantiteStock > 0 ? "Ajouter au panier" : "Épuisé"}
-                          disabled={(product.quantiteStock || 0) <= 0}
-                          style={(product.quantiteStock || 0) <= 0 ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
-                        >
-                          <FiShoppingCart />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <ProductCard 
+                    key={product.id} 
+                    product={product} 
+                    getImageUrl={getImageUrl} 
+                    handleAddToCart={handleAddToCart} 
+                  />
                 ))}
               </div>
             )}

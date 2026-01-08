@@ -1,0 +1,49 @@
+@startuml DA08 - Navigation Boutique
+
+title DA08 - Navigation dans la Boutique
+
+start
+
+:Acceder a la boutique;
+:Afficher page d'accueil;
+
+switch (Mode de navigation ?)
+
+case (Par categorie)
+    :Selectionner une categorie;
+    :Charger produits approuves de la categorie;
+
+case (Par recherche)
+    :Saisir mot-cle;
+    :Rechercher dans le catalogue;
+
+case (Produits populaires)
+    :Charger produits les mieux notes;
+
+endswitch
+
+:Afficher liste des produits;
+
+repeat
+    if (Appliquer filtres ?) then (oui)
+        :Selectionner filtres (prix, note, disponibilite);
+        :Actualiser resultats;
+    endif
+    
+    :Cliquer sur un produit;
+    :Afficher fiche produit avec vendeurs et avis;
+    
+    if (Ajouter au panier ?) then (oui)
+        if (Utilisateur connecte ?) then (non)
+            :Rediriger vers connexion;
+        else (oui)
+            :Selectionner quantite;
+            :Ajouter au panier;
+        endif
+    endif
+    
+repeat while (Continuer navigation ?) is (oui)
+
+stop
+
+@enduml

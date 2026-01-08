@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { StoreHeader, StoreFooter, CartSidebar } from './StoreHome';
 import storeService from '../../services/storeService';
+import { getImageUrl } from '../../config/apiConfig';
 import { 
   FiShoppingCart, 
   FiUser, 
@@ -17,7 +18,7 @@ import '../../styles/Store.css';
 
 const StoreCheckout = () => {
   const navigate = useNavigate();
-  const { cartItems, getCartTotal, clearCart, getCartCount } = useCart();
+  const { cartItems, getCartTotal, clearCartLocal, getCartCount, syncWithUser } = useCart();
   const [searchTerm, setSearchTerm] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -76,7 +77,17 @@ const StoreCheckout = () => {
 
     try {
       const response = await storeService.login(authData.email, authData.password);
+      console.log('=== Login Response ===');
+      console.log('Success:', response.success);
+      console.log('Token reçu:', response.token ? 'OUI (longueur: ' + response.token.length + ')' : 'NON');
+      console.log('Role:', response.role);
+      
       if (response.success) {
+        if (!response.token) {
+          setError('Erreur: Token non reçu du serveur. Veuillez réessayer.');
+          setLoading(false);
+          return;
+        }
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify({
           id: response.id,
@@ -100,6 +111,8 @@ const StoreCheckout = () => {
           adresseLivraison: response.adresseLivraison || prev.adresseLivraison
         }));
         setShowAuthModal(false);
+        // Synchroniser le panier avec l'utilisateur connecté
+        await syncWithUser();
       } else {
         setError(response.message || 'Erreur de connexion');
       }
@@ -147,6 +160,8 @@ const StoreCheckout = () => {
           adresseLivraison: authData.adresseLivraison
         }));
         setShowAuthModal(false);
+        // Synchroniser le panier avec l'utilisateur connecté
+        await syncWithUser();
       } else {
         setError(response.message || 'Erreur lors de l\'inscription');
       }
@@ -163,6 +178,12 @@ const StoreCheckout = () => {
       return;
     }
 
+    // Vérifier que l'utilisateur a le rôle CLIENT
+    if (user.role !== 'CLIENT') {
+      setError('Seuls les clients peuvent passer des commandes. Veuillez vous connecter avec un compte client.');
+      return;
+    }
+
     if (!formData.adresseLivraison) {
       setError('Veuillez renseigner votre adresse de livraison');
       return;
@@ -174,14 +195,24 @@ const StoreCheckout = () => {
     try {
       // Debug: Vérifier l'authentification
       console.log('=== DEBUG AUTH ===');
-      console.log('Token dans localStorage:', localStorage.getItem('token'));
-      console.log('User dans localStorage:', localStorage.getItem('user'));
+      const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+      console.log('Token présent:', token ? 'OUI' : 'NON');
+      console.log('User dans localStorage:', userStr);
       
-      try {
-        const debugInfo = await storeService.debugAuth();
-        console.log('Debug Auth Response:', debugInfo);
-      } catch (debugErr) {
-        console.error('Debug Auth Error:', debugErr.response?.status, debugErr.response?.data);
+      if (!token) {
+        setError('Session expirée. Veuillez vous reconnecter.');
+        setLoading(false);
+        return;
+      }
+      
+      const parsedUser = userStr ? JSON.parse(userStr) : null;
+      console.log('User role:', parsedUser?.role);
+      
+      if (!parsedUser || parsedUser.role !== 'CLIENT') {
+        setError('Seuls les clients peuvent passer des commandes. Veuillez vous connecter avec un compte client.');
+        setLoading(false);
+        return;
       }
 
       const commandeData = {
@@ -197,22 +228,29 @@ const StoreCheckout = () => {
 
       console.log('Sending order data:', commandeData);
       await storeService.passerCommande(commandeData);
-      clearCart();
+      
+      // Le panier est déjà vidé côté backend par CommandeService
+      // On vide simplement le state local sans appeler l'API
+      clearCartLocal();
+      
       navigate('/store/order-success');
     } catch (err) {
       console.error('Order error:', err);
       console.error('Error response:', err.response);
       
       if (err.response?.status === 403) {
-        setError('Accès refusé. Veuillez vous déconnecter et vous reconnecter en tant que client.');
+        // Supprimer le token invalide et forcer une reconnexion
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
+        setError('Votre session a expiré ou est invalide. Veuillez vous reconnecter.');
+        setShowAuthModal(true);
       } else if (err.response?.status === 401) {
-        setError('Session expirée. Veuillez vous reconnecter.');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
+        setError('Session expirée. Veuillez vous reconnecter.');
+        setShowAuthModal(true);
       } else {
         const errorMessage = err.response?.data?.message || err.message || 'Erreur lors de la commande. Veuillez réessayer.';
         setError(errorMessage);
@@ -222,15 +260,9 @@ const StoreCheckout = () => {
     }
   };
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return null;
-    if (imagePath.startsWith('http')) return imagePath;
-    return `http://localhost:8080${imagePath}`;
-  };
-
   const subtotal = getCartTotal();
-  const shipping = subtotal >= 500 ? 0 : 30;
-  const total = subtotal + shipping;
+  const shipping = 0; // Livraison toujours gratuite
+  const total = subtotal;
 
   return (
     <div className="store-container">
@@ -274,6 +306,7 @@ const StoreCheckout = () => {
                         localStorage.removeItem('token');
                         localStorage.removeItem('user');
                         setUser(null);
+                        syncWithUser(); // Mettre à jour le panier après déconnexion
                       }}
                     >
                       Se déconnecter
@@ -395,7 +428,7 @@ const StoreCheckout = () => {
                   </div>
                   <div className="store-order-total-row">
                     <span>Livraison</span>
-                    <span>{shipping === 0 ? 'Gratuite' : `${shipping.toFixed(2)} DH`}</span>
+                    <span>Gratuite</span>
                   </div>
                   <div className="store-order-total-row final">
                     <span>Total</span>

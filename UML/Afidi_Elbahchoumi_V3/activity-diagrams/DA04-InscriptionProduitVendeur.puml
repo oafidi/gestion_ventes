@@ -1,0 +1,49 @@
+@startuml DA04 - Inscription Produit Vendeur
+
+title DA04 - Inscription d'un Produit par le Vendeur
+
+start
+
+:Acceder a l'espace vendeur;
+
+if (Vendeur approuve ?) then (non)
+    :Afficher "En attente d'approbation";
+    stop
+else (oui)
+endif
+
+:Cliquer sur "Inscrire un produit";
+:Afficher catalogue produits;
+:Selectionner un produit;
+
+:Verifier si deja inscrit;
+
+if (Produit deja inscrit ?) then (oui)
+    :Afficher "Vous vendez deja ce produit";
+    stop
+else (non)
+endif
+
+:Remplir formulaire offre;
+note right
+    Prix, Description, Quantite
+end note
+
+:Soumettre l'offre;
+:Valider les informations;
+
+if (Informations valides ?) then (non)
+    :Afficher erreurs;
+    stop
+else (oui)
+endif
+
+:Creer offre VendeurProduit;
+:estApprouve = false;
+:Notifier l'admin;
+
+:Afficher "Offre soumise, en attente de validation";
+
+stop
+
+@enduml

@@ -46,6 +46,20 @@ const vendeurService = {
   rejeterVendeur: async (id) => {
     const response = await api.delete(`/admin/vendeurs/${id}/rejeter`);
     return response.data;
+  },
+
+  // ========== Profil Vendeur ==========
+
+  // Récupérer le profil du vendeur connecté
+  getMonProfil: async () => {
+    const response = await api.get('/vendeur/profil');
+    return response.data;
+  },
+
+  // Mettre à jour le profil du vendeur connecté
+  updateMonProfil: async (profilData) => {
+    const response = await api.put('/vendeur/profil', profilData);
+    return response.data;
   }
 };
 

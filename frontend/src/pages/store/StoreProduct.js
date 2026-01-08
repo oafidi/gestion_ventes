@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { StoreHeader, StoreFooter, CartSidebar } from './StoreHome';
 import storeService from '../../services/storeService';
+import { getImageUrl } from '../../config/apiConfig';
 import { 
   FiShoppingCart, 
   FiShoppingBag, 
@@ -190,12 +191,6 @@ const StoreProduct = () => {
     navigate('/store/checkout');
   };
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return null;
-    if (imagePath.startsWith('http')) return imagePath;
-    return `http://localhost:8080${imagePath}`;
-  };
-
   if (loading) {
     return (
       <div className="store-container">
@@ -352,7 +347,7 @@ const StoreProduct = () => {
               <div style={{ marginTop: '30px', padding: '20px', background: 'var(--store-gray-100)', borderRadius: 'var(--store-radius-sm)' }}>
                 <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <FiTruck />
-                  <span>Livraison gratuite à partir de 500 DH</span>
+                  <span>Livraison gratuite</span>
                 </div>
                 <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <FiRefreshCw />

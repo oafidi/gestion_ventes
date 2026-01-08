@@ -1,0 +1,136 @@
+@startuml DS12 - Statistiques Admin
+
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam sequenceMessageAlign center
+
+title DS12 - Tableau de Bord Analytique Admin
+
+actor Admin as A
+boundary "<<boundary>>\nDashboardPage" as DP
+control "<<control>>\nStatistiquesController" as SC
+entity "<<entity>>\nCommande" as CMD
+entity "<<entity>>\nUtilisateur" as U
+entity "<<entity>>\nProduit" as P
+entity "<<entity>>\nVendeur" as V
+
+== Accueil Dashboard ==
+
+A -> DP : accederDashboard()
+activate DP
+DP -> SC : getKPIs()
+activate SC
+
+SC -> CMD : getTotalVentes(periodeActuelle)
+activate CMD
+CMD --> SC : chiffreAffaires
+deactivate CMD
+
+SC -> CMD : countByPeriode(periodeActuelle)
+activate CMD
+CMD --> SC : nombreCommandes
+deactivate CMD
+
+SC -> U : countByRole(CLIENT)
+activate U
+U --> SC : nombreClients
+deactivate U
+
+SC -> V : countByEstApprouve(true)
+activate V
+V --> SC : nombreVendeurs
+deactivate V
+
+SC --> DP : kpisData
+deactivate SC
+DP --> A : afficherDashboard(kpisData)
+deactivate DP
+
+== Statistiques des Ventes ==
+
+A -> DP : consulterStatistiquesVentes()
+activate DP
+DP -> SC : getVentesStats(periode)
+activate SC
+SC -> CMD : getVentesParJour(periode)
+activate CMD
+CMD --> SC : ventesParJour
+deactivate CMD
+SC -> CMD : getTopVendeurs(limit)
+activate CMD
+CMD --> SC : topVendeurs
+deactivate CMD
+SC --> DP : ventesData
+deactivate SC
+DP --> A : afficherGraphiquesVentes(ventesData)
+deactivate DP
+
+A -> DP : filtrerParPeriode(dateDebut, dateFin)
+activate DP
+DP -> SC : getVentesStats(dateDebut, dateFin)
+activate SC
+SC -> CMD : getVentesParPeriode(dateDebut, dateFin)
+activate CMD
+CMD --> SC : ventesFiltrees
+deactivate CMD
+SC --> DP : ventesFiltrees
+deactivate SC
+DP --> A : afficherResultatsFiltres(ventesFiltrees)
+deactivate DP
+
+== Statistiques Utilisateurs ==
+
+A -> DP : consulterStatistiquesUtilisateurs()
+activate DP
+DP -> SC : getUserStats()
+activate SC
+SC -> U : countByRole()
+activate U
+U --> SC : repartitionRoles
+deactivate U
+SC -> V : findByEstApprouve(false)
+activate V
+V --> SC : vendeursEnAttente
+deactivate V
+SC --> DP : userStats
+deactivate SC
+DP --> A : afficherStatsUtilisateurs(userStats)
+deactivate DP
+
+== Statistiques Produits ==
+
+A -> DP : consulterStatistiquesProduits()
+activate DP
+DP -> SC : getProduitStats()
+activate SC
+SC -> P : countAll()
+activate P
+P --> SC : totalProduits
+deactivate P
+SC -> P : findByStockLessThan(seuilAlerte)
+activate P
+P --> SC : produitsEnAlerte
+deactivate P
+SC -> CMD : getTopProduits(limit)
+activate CMD
+CMD --> SC : topProduits
+deactivate CMD
+SC --> DP : produitStats
+deactivate SC
+DP --> A : afficherStatsProduits(produitStats)
+deactivate DP
+
+== Export Rapports ==
+
+A -> DP : genererRapport(typeRapport, periode)
+activate DP
+DP -> SC : genererRapport(typeRapport, periode)
+activate SC
+SC -> SC : collecterDonnees(typeRapport, periode)
+SC -> SC : genererPDF(donnees)
+SC --> DP : rapportPDF
+deactivate SC
+DP --> A : telechargerRapport(rapportPDF)
+deactivate DP
+
+@enduml

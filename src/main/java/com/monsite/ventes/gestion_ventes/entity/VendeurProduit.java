@@ -4,13 +4,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "vendeur_produits")
 @Data
+@EqualsAndHashCode(exclude = {"vendeur", "produit"})
+@ToString(exclude = {"vendeur", "produit"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class VendeurProduit {

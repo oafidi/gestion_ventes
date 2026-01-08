@@ -1,0 +1,56 @@
+@startuml DA01 - Authentification
+
+title DA01 - Processus d'Authentification
+
+start
+
+:Acceder a la plateforme;
+
+if (Possede un compte ?) then (non)
+    :Remplir formulaire d'inscription;
+    :Verifier disponibilite email;
+    
+    if (Email deja utilise ?) then (oui)
+        :Afficher erreur "Email existant";
+        stop
+    else (non)
+        :Creer le compte utilisateur;
+        
+        if (Role = Vendeur ?) then (oui)
+            :Marquer estApprouve = false;
+        else (non)
+            :Activer le compte;
+        endif
+    endif
+else (oui)
+    :Saisir email et mot de passe;
+    :Verifier les identifiants;
+    
+    if (Identifiants valides ?) then (non)
+        :Afficher erreur "Identifiants incorrects";
+        stop
+    else (oui)
+        :Creer la session utilisateur;
+    endif
+endif
+
+:Determiner le role;
+
+switch (Role ?)
+case (ADMIN)
+    :Rediriger vers Tableau de bord Admin;
+case (VENDEUR)
+    if (Vendeur approuve ?) then (oui)
+        :Rediriger vers Espace Vendeur;
+    else (non)
+        :Afficher page d'attente validation;
+    endif
+case (CLIENT)
+    :Rediriger vers Boutique;
+endswitch
+
+:Acces a l'espace personnel;
+
+stop
+
+@enduml

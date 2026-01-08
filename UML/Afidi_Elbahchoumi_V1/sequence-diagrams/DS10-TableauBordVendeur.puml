@@ -1,0 +1,135 @@
+@startuml DS10 - Tableau de Bord Vendeur
+
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam sequenceMessageAlign center
+
+title DS10 - Espace Vendeur
+
+actor Vendeur as V
+boundary "<<boundary>>\nEspaceVendeurPage" as EVP
+control "<<control>>\nVendeurController" as VC
+entity "<<entity>>\nVendeurProduit" as VP
+entity "<<entity>>\nCommande" as CMD
+entity "<<entity>>\nAvis" as A
+
+== Tableau de Bord ==
+
+V -> EVP : accederEspaceVendeur()
+activate EVP
+EVP -> VC : getDashboard(vendeurId)
+activate VC
+VC -> VP : countByVendeurId(vendeurId)
+activate VP
+VP --> VC : nombreProduits
+deactivate VP
+VC -> CMD : getStatistiquesVendeur(vendeurId)
+activate CMD
+CMD --> VC : statistiquesVentes
+deactivate CMD
+VC -> A : getNoteMoyenneVendeur(vendeurId)
+activate A
+A --> VC : noteMoyenne
+deactivate A
+VC --> EVP : dashboardData
+deactivate VC
+EVP --> V : afficherTableauDeBord(dashboardData)
+deactivate EVP
+
+== Gestion des Produits ==
+
+V -> EVP : consulterMesProduits()
+activate EVP
+EVP -> VC : getMesProduits(vendeurId)
+activate VC
+VC -> VP : findByVendeurId(vendeurId)
+activate VP
+VP --> VC : mesProduits
+deactivate VP
+VC --> EVP : mesProduits
+deactivate VC
+EVP --> V : afficherMesProduits(mesProduits)
+deactivate EVP
+
+V -> EVP : modifierOffre(vendeurProduitId)
+activate EVP
+EVP -> VC : getOffre(vendeurProduitId)
+activate VC
+VC -> VP : findById(vendeurProduitId)
+activate VP
+VP --> VC : offre
+deactivate VP
+VC --> EVP : offre
+deactivate VC
+EVP --> V : afficherFormulaireModification(offre)
+deactivate EVP
+
+V -> EVP : enregistrerModifications(vendeurProduitId, prix, description)
+activate EVP
+EVP -> VC : updateOffre(vendeurProduitId, prix, description)
+activate VC
+VC -> VP : update(vendeurProduitId, prix, description)
+activate VP
+VP --> VC : offreModifiee
+deactivate VP
+VC -> VP : setEstApprouve(false)
+activate VP
+VP --> VC : offreNonApprouvee
+deactivate VP
+VC -> VP : save(offre)
+activate VP
+VP --> VC : offreSauvegardee
+deactivate VP
+VC --> EVP : succes
+deactivate VC
+EVP --> V : afficherConfirmation("Offre modifiee, en attente de validation")
+deactivate EVP
+
+== Gestion des Avis ==
+
+V -> EVP : consulterMesAvis()
+activate EVP
+EVP -> VC : getMesAvis(vendeurId)
+activate VC
+VC -> A : findByVendeurId(vendeurId)
+activate A
+A --> VC : mesAvis
+deactivate A
+VC --> EVP : mesAvis
+deactivate VC
+EVP --> V : afficherMesAvis(mesAvis)
+deactivate EVP
+
+V -> EVP : masquerAvis(avisId)
+activate EVP
+EVP -> VC : masquerAvis(avisId)
+activate VC
+VC -> A : setEstCache(avisId, true)
+activate A
+A --> VC : avisMasque
+deactivate A
+VC -> A : save(avis)
+activate A
+A --> VC : avisSauvegarde
+deactivate A
+VC --> EVP : succes
+deactivate VC
+EVP --> V : afficherConfirmation("Avis masque")
+deactivate EVP
+
+== Statistiques ==
+
+V -> EVP : consulterStatistiques()
+activate EVP
+EVP -> VC : getStatistiques(vendeurId, periode)
+activate VC
+VC -> CMD : getVentesParPeriode(vendeurId, periode)
+activate CMD
+CMD --> VC : ventesData
+deactivate CMD
+VC --> EVP : statistiques
+deactivate VC
+EVP --> V : afficherStatistiques(statistiques)
+deactivate EVP
+
+@enduml

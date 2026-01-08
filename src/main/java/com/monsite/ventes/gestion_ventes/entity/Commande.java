@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,6 +17,8 @@ import java.util.List;
 @Entity
 @Table(name = "commandes")
 @Data
+@EqualsAndHashCode(exclude = {"client", "lignesCommande"})
+@ToString(exclude = {"client", "lignesCommande"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class Commande {

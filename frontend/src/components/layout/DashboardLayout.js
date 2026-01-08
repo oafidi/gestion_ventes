@@ -11,7 +11,7 @@ import { Categories } from '../../pages/categories';
 import { Produits } from '../../pages/produits';
 import { Vendeurs } from '../../pages/vendeurs';
 import { Inscriptions } from '../../pages/inscriptions';
-import { CommandesList } from '../../pages/commandes';
+import { CommandesList, ImportCommandes } from '../../pages/commandes';
 import { AdminAnalyticsDashboard } from '../../pages/analytics';
 import '../../styles/layout.css';
 
@@ -110,6 +110,13 @@ const Icons = {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="6 9 12 15 18 9"/>
     </svg>
+  ),
+  upload: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="17 8 12 3 7 8"/>
+      <line x1="12" y1="3" x2="12" y2="15"/>
+    </svg>
   )
 };
 
@@ -130,6 +137,7 @@ const menuSections = [
       { path: '/dashboard/vendeurs', icon: 'users', label: 'Vendeurs' },
       { path: '/dashboard/inscriptions', icon: 'clipboard', label: 'Inscriptions' },
       { path: '/dashboard/commandes', icon: 'shoppingCart', label: 'Commandes' },
+      { path: '/dashboard/import-commandes', icon: 'upload', label: 'Import CSV' },
       { path: '/dashboard/statistiques', icon: 'barChart', label: 'Statistiques' },
     ]
   }
@@ -306,6 +314,7 @@ const DashboardLayout = () => {
             <Route path="/vendeurs" element={<Vendeurs />} />
             <Route path="/inscriptions" element={<Inscriptions />} />
             <Route path="/commandes" element={<CommandesList />} />
+            <Route path="/import-commandes" element={<ImportCommandes />} />
             <Route path="/statistiques" element={<Statistiques />} />
           </Routes>
         </div>

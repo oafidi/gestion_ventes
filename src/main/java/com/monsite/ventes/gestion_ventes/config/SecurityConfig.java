@@ -71,6 +71,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/produits/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/vendeur-produits/approuves").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/vendeur-produits/approuves/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/avis/produit/**").permitAll()
                         
                         // Routes Admin uniquement
@@ -94,7 +95,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:4200", "http://localhost:5173"));
+        // Permettre toutes les origines pour supporter WSL et différentes configurations
+        configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
         configuration.setExposedHeaders(Arrays.asList("Authorization"));

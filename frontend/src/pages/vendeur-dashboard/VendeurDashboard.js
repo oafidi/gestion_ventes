@@ -4,6 +4,7 @@ import VendeurMesProduits from './VendeurMesProduits';
 import VendeurInscrireProduit from './VendeurInscrireProduit';
 import VendeurModifierProduit from './VendeurModifierProduit';
 import VendeurAvis from './VendeurAvis';
+import VendeurProfil from './VendeurProfil';
 import { VendeurAnalyticsDashboard } from '../analytics';
 import { getKPIsVendeur, getCommandesVendeur, formatCurrency } from '../../services/analyticsService';
 import './VendeurDashboard.css';
@@ -52,8 +53,8 @@ const VendeurHome = () => {
             </svg>
           </div>
           <div className="kpi-info">
-            <span className="kpi-label">Chiffre d'affaires (livrées)</span>
-            <span className="kpi-value">{formatCurrency(kpis?.chiffreAffairesTotal || 0)}</span>
+            <span className="kpi-label">Marge (commandes livrées)</span>
+            <span className="kpi-value">{formatCurrency(commandes?.totalCA || 0)}</span>
           </div>
         </div>
         
@@ -152,7 +153,9 @@ const VendeurHome = () => {
                      cmd.statut === 'CONFIRMEE' ? 'Confirmée' :
                      cmd.statut === 'LIVREE' ? 'Livrée' : 'Annulée'}
                   </span>
-                  <span className="order-marge">+{formatCurrency(cmd.margeVendeur)}</span>
+                  {cmd.statut === 'LIVREE' && (
+                    <span className="order-marge">+{formatCurrency(cmd.margeVendeur)}</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -180,6 +183,7 @@ const VendeurDashboard = () => {
     { path: '/vendeur/dashboard/mes-produits', label: 'Mes Produits', icon: 'M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z' },
     { path: '/vendeur/dashboard/inscrire-produit', label: 'Inscrire Produit', icon: 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z' },
     { path: '/vendeur/dashboard/avis', label: 'Avis Clients', icon: 'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z' },
+    { path: '/vendeur/dashboard/profil', label: 'Mon Profil', icon: 'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' },
   ];
 
   return (
@@ -247,6 +251,7 @@ const VendeurDashboard = () => {
             <Route path="/inscrire-produit" element={<VendeurInscrireProduit />} />
             <Route path="/modifier-produit/:id" element={<VendeurModifierProduit />} />
             <Route path="/avis" element={<VendeurAvis />} />
+            <Route path="/profil" element={<VendeurProfil />} />
           </Routes>
         </div>
       </main>

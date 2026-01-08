@@ -1,0 +1,41 @@
+@startuml DA03 - Traitement Commande Admin
+
+title DA03 - Traitement des Commandes (Cash on Delivery)
+
+start
+
+:Acceder au tableau de bord;
+:Afficher commandes en attente;
+:Selectionner une commande;
+:Afficher details complets;
+
+:Admin appelle le client pour confirmer;
+
+if (Client confirme la commande ?) then (oui)
+    :Statut = CONFIRMEE;
+    :Preparer la commande pour expedition;
+    :Statut = EN_LIVRAISON;
+    :Notifier client "Commande en cours de livraison";
+    
+    :Livreur arrive chez le client;
+    
+    if (Client disponible et accepte ?) then (oui)
+        :Client paie en especes;
+        :Statut = LIVREE;
+        :Notifier client "Commande livree";
+    else (non)
+        :Client absent ou refuse;
+        :Statut = ANNULEE;
+        :Restaurer le stock;
+        :Notifier client "Commande annulee";
+    endif
+else (non)
+    :Client ne confirme pas;
+    :Statut = ANNULEE;
+    :Restaurer le stock;
+    :Notifier client "Commande annulee";
+endif
+
+stop
+
+@enduml

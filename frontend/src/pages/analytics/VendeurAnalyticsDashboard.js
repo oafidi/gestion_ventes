@@ -4,6 +4,7 @@
  * Analyse des produits, recommandations et insights
  */
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   FiDollarSign, 
   FiShoppingCart, 
@@ -61,10 +62,13 @@ import {
 } from '../../services/analyticsService';
 
 import { getAllCategories } from '../../services/categorieService';
+import { BACKEND_URL } from '../../config/apiConfig';
 
 import './AnalyticsDashboard.css';
 
 const VendeurAnalyticsDashboard = () => {
+  const navigate = useNavigate();
+  
   // ==================== STATE ====================
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -245,7 +249,7 @@ const VendeurAnalyticsDashboard = () => {
         </div>
         {kpis.produitPlusVendu.image && (
           <img 
-            src={kpis.produitPlusVendu.image.startsWith('/uploads') ? `http://localhost:8080${kpis.produitPlusVendu.image}` : `http://localhost:8080/uploads/vendeur-produits/${kpis.produitPlusVendu.image}`}
+            src={kpis.produitPlusVendu.image.startsWith('/uploads') ? `\`\$\{BACKEND_URL\}${kpis.produitPlusVendu.image}` : `\`\$\{BACKEND_URL\}/uploads/vendeur-produits/${kpis.produitPlusVendu.image}`}
             alt={kpis.produitPlusVendu.nomProduit}
             className="highlight-image"
           />
@@ -275,7 +279,7 @@ const VendeurAnalyticsDashboard = () => {
         </div>
         {kpis.produitMieuxNote.image && (
           <img 
-            src={kpis.produitMieuxNote.image.startsWith('/uploads') ? `http://localhost:8080${kpis.produitMieuxNote.image}` : `http://localhost:8080/uploads/vendeur-produits/${kpis.produitMieuxNote.image}`}
+            src={kpis.produitMieuxNote.image.startsWith('/uploads') ? `\`\$\{BACKEND_URL\}${kpis.produitMieuxNote.image}` : `\`\$\{BACKEND_URL\}/uploads/vendeur-produits/${kpis.produitMieuxNote.image}`}
             alt={kpis.produitMieuxNote.nomProduit}
             className="highlight-image"
           />
@@ -396,7 +400,7 @@ const VendeurAnalyticsDashboard = () => {
         render: (value, row) => (
           <div className="product-cell">
             <img 
-              src={row.image ? (row.image.startsWith('/uploads') ? `http://localhost:8080${row.image}` : `http://localhost:8080/uploads/vendeur-produits/${row.image}`) : '/placeholder.png'} 
+              src={row.image ? (row.image.startsWith('/uploads') ? `\`\$\{BACKEND_URL\}${row.image}` : `\`\$\{BACKEND_URL\}/uploads/vendeur-produits/${row.image}`) : '/placeholder.png'} 
               alt={value}
               className="product-thumb"
             />
@@ -551,7 +555,10 @@ const VendeurAnalyticsDashboard = () => {
                   <FiCheckCircle />
                   <span>{produit.suggestion}</span>
                 </div>
-                <button className="btn-inscription">
+                <button 
+                  className="btn-inscription"
+                  onClick={() => navigate('/vendeur/inscrire-produit', { state: { produitId: produit.produitId, produitNom: produit.nomProduit } })}
+                >
                   S'inscrire à ce produit
                 </button>
               </div>
@@ -744,6 +751,7 @@ const VendeurAnalyticsDashboard = () => {
             <option value="">Tous</option>
             <option value="EN_ATTENTE">En attente</option>
             <option value="CONFIRMEE">Confirmée</option>
+            <option value="EN_COURS_LIVRAISON">En cours de livraison</option>
             <option value="LIVREE">Livrée</option>
             <option value="ANNULEE">Annulée</option>
           </select>
@@ -797,7 +805,7 @@ const VendeurAnalyticsDashboard = () => {
                           <div className="ligne-image">
                             {ligne.produitImage ? (
                               <img 
-                                src={ligne.produitImage.startsWith('/uploads') ? `http://localhost:8080${ligne.produitImage}` : `http://localhost:8080/uploads/vendeur-produits/${ligne.produitImage}`}
+                                src={ligne.produitImage.startsWith('/uploads') ? `\`\$\{BACKEND_URL\}${ligne.produitImage}` : `\`\$\{BACKEND_URL\}/uploads/vendeur-produits/${ligne.produitImage}`}
                                 alt={ligne.produitNom}
                               />
                             ) : (
@@ -814,12 +822,14 @@ const VendeurAnalyticsDashboard = () => {
                               Votre prix: {formatCurrency(ligne.prixVendeur)}
                             </span>
                           </div>
-                          <div className="ligne-marge">
-                            <span className="marge-label">Marge</span>
-                            <span className={`marge-value ${ligne.margeLigne >= 0 ? 'positive' : 'negative'}`}>
-                              {ligne.margeLigne >= 0 ? '+' : ''}{formatCurrency(ligne.margeLigne)}
-                            </span>
-                          </div>
+                          {commande.statut === 'LIVREE' && (
+                            <div className="ligne-marge">
+                              <span className="marge-label">Marge</span>
+                              <span className={`marge-value ${ligne.margeLigne >= 0 ? 'positive' : 'negative'}`}>
+                                {ligne.margeLigne >= 0 ? '+' : ''}{formatCurrency(ligne.margeLigne)}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -831,12 +841,14 @@ const VendeurAnalyticsDashboard = () => {
                         <span>Ventes:</span>
                         <span>{formatCurrency(commande.montantVendu)}</span>
                       </div>
-                      <div className="montant-item marge-total">
-                        <span>Votre marge:</span>
-                        <strong className={commande.margeVendeur >= 0 ? 'positive' : 'negative'}>
-                          {commande.margeVendeur >= 0 ? '+' : ''}{formatCurrency(commande.margeVendeur)}
-                        </strong>
-                      </div>
+                      {commande.statut === 'LIVREE' && (
+                        <div className="montant-item marge-total">
+                          <span>Votre marge:</span>
+                          <strong className={commande.margeVendeur >= 0 ? 'positive' : 'negative'}>
+                            {commande.margeVendeur >= 0 ? '+' : ''}{formatCurrency(commande.margeVendeur)}
+                          </strong>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

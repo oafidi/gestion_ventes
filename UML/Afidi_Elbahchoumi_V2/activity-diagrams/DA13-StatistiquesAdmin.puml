@@ -1,0 +1,49 @@
+@startuml DA13 - Statistiques Admin
+
+title DA13 - Statistiques et Tableau de Bord Admin
+
+start
+
+:Acceder au tableau de bord admin;
+
+fork
+    :Charger les KPIs;
+fork again
+    :Charger les alertes;
+fork again
+    :Charger les graphiques;
+end fork
+
+:Afficher vue d'ensemble;
+
+switch (Analyse ?)
+
+case (Analyse des ventes)
+    :Charger donnees de ventes;
+    :Afficher graphiques de ventes;
+    :Appliquer filtres (periode, categorie, vendeur);
+    :Actualiser les resultats;
+
+case (Analyse des utilisateurs)
+    :Charger statistiques utilisateurs;
+    :Afficher repartition par role;
+    :Afficher nouveaux inscrits;
+    :Afficher vendeurs en attente;
+
+case (Analyse des produits)
+    :Charger statistiques produits;
+    :Afficher top produits vendus;
+    :Afficher alertes stock;
+    :Afficher categories populaires;
+
+case (Generer rapport)
+    :Selectionner type de rapport;
+    :Selectionner periode;
+    :Generer le rapport PDF;
+    :Telecharger le rapport;
+
+endswitch
+
+stop
+
+@enduml

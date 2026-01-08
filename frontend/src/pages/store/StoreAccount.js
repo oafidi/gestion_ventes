@@ -3,12 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { StoreHeader, StoreFooter, CartSidebar } from './StoreHome';
 import { useCart } from '../../context/CartContext';
 import storeService from '../../services/storeService';
-import { FiUser, FiPackage, FiSettings, FiLogOut, FiShoppingBag, FiInbox, FiXCircle, FiAlertTriangle, FiX } from 'react-icons/fi';
+import { FiUser, FiPackage, FiSettings, FiLogOut, FiShoppingBag, FiInbox, FiXCircle, FiAlertTriangle, FiX, FiEdit2, FiSave } from 'react-icons/fi';
 import '../../styles/Store.css';
 
 const StoreAccount = () => {
   const navigate = useNavigate();
-  const { getCartCount } = useCart();
+  const { getCartCount, syncWithUser } = useCart();
   const [searchTerm, setSearchTerm] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
   const [user, setUser] = useState(null);
@@ -19,6 +19,12 @@ const StoreAccount = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState(null);
+  
+  // États pour l'édition du profil
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileData, setProfileData] = useState({ nom: '', telephone: '', adresseLivraison: '' });
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -26,7 +32,13 @@ const StoreAccount = () => {
       navigate('/store/login');
       return;
     }
-    setUser(JSON.parse(storedUser));
+    const userData = JSON.parse(storedUser);
+    setUser(userData);
+    setProfileData({
+      nom: userData.nom || '',
+      telephone: userData.telephone || '',
+      adresseLivraison: userData.adresseLivraison || ''
+    });
     fetchOrders();
   }, [navigate]);
 
@@ -43,9 +55,50 @@ const StoreAccount = () => {
     }
   };
 
-  const handleLogout = () => {
+  // Gestion de la mise à jour du profil
+  const handleProfileChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    setProfileLoading(true);
+    setProfileMessage({ type: '', text: '' });
+
+    try {
+      await storeService.updateProfil(profileData);
+      
+      // Mettre à jour le localStorage
+      const updatedUser = { ...user, ...profileData };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      
+      setProfileMessage({ type: 'success', text: 'Profil mis à jour avec succès !' });
+      setIsEditingProfile(false);
+    } catch (error) {
+      setProfileMessage({ type: 'error', text: error.response?.data?.message || 'Erreur lors de la mise à jour du profil' });
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const cancelProfileEdit = () => {
+    setProfileData({
+      nom: user.nom || '',
+      telephone: user.telephone || '',
+      adresseLivraison: user.adresseLivraison || ''
+    });
+    setIsEditingProfile(false);
+    setProfileMessage({ type: '', text: '' });
+  };
+
+  const handleLogout = async () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    // Ne pas supprimer cart_guest - il appartient aux visiteurs non connectés
+    // Le panier du client est sauvegardé en base de données
+    await syncWithUser(); // Réinitialiser l'état du panier (afficher le panier guest)
     navigate('/store');
   };
 
@@ -355,52 +408,145 @@ const StoreAccount = () => {
 
             {activeTab === 'profile' && (
               <div className="store-checkout-section">
-                <h2 style={{ borderBottom: '1px solid var(--store-gray-200)', paddingBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <FiSettings /> Mon profil
-                </h2>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                  <div className="store-form-group">
-                    <label className="store-form-label">Nom</label>
-                    <input
-                      type="text"
-                      className="store-form-input"
-                      value={user.nom || ''}
-                      disabled
-                    />
-                  </div>
-                  <div className="store-form-group">
-                    <label className="store-form-label">Email</label>
-                    <input
-                      type="email"
-                      className="store-form-input"
-                      value={user.email || ''}
-                      disabled
-                    />
-                  </div>
-                  <div className="store-form-group">
-                    <label className="store-form-label">Téléphone</label>
-                    <input
-                      type="tel"
-                      className="store-form-input"
-                      value={user.telephone || '-'}
-                      disabled
-                    />
-                  </div>
-                  <div className="store-form-group">
-                    <label className="store-form-label">Rôle</label>
-                    <input
-                      type="text"
-                      className="store-form-input"
-                      value={user.role || '-'}
-                      disabled
-                    />
-                  </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--store-gray-200)', paddingBottom: '15px' }}>
+                  <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
+                    <FiSettings /> Mon profil
+                  </h2>
+                  {!isEditingProfile && (
+                    <button
+                      onClick={() => setIsEditingProfile(true)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 16px',
+                        background: 'var(--store-primary)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: 'var(--store-radius-sm)',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                      }}
+                    >
+                      <FiEdit2 /> Modifier
+                    </button>
+                  )}
                 </div>
 
-                <p style={{ color: 'var(--store-gray-500)', fontSize: '14px', marginTop: '20px' }}>
-                  Pour modifier vos informations, veuillez contacter le support.
-                </p>
+                {profileMessage.text && (
+                  <div style={{
+                    padding: '12px 15px',
+                    marginTop: '20px',
+                    borderRadius: 'var(--store-radius-sm)',
+                    backgroundColor: profileMessage.type === 'success' ? '#d4edda' : '#f8d7da',
+                    color: profileMessage.type === 'success' ? '#155724' : '#721c24',
+                    border: `1px solid ${profileMessage.type === 'success' ? '#c3e6cb' : '#f5c6cb'}`
+                  }}>
+                    {profileMessage.text}
+                  </div>
+                )}
+
+                <form onSubmit={handleProfileSubmit} style={{ marginTop: '20px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                    <div className="store-form-group">
+                      <label className="store-form-label">Nom *</label>
+                      <input
+                        type="text"
+                        name="nom"
+                        className="store-form-input"
+                        value={profileData.nom}
+                        onChange={handleProfileChange}
+                        disabled={!isEditingProfile}
+                        required
+                      />
+                    </div>
+                    <div className="store-form-group">
+                      <label className="store-form-label">Email</label>
+                      <input
+                        type="email"
+                        className="store-form-input"
+                        value={user.email || ''}
+                        disabled
+                        style={{ backgroundColor: '#f3f4f6' }}
+                      />
+                      <small style={{ color: 'var(--store-gray-500)', fontSize: '12px' }}>L'email ne peut pas être modifié</small>
+                    </div>
+                    <div className="store-form-group">
+                      <label className="store-form-label">Téléphone *</label>
+                      <input
+                        type="tel"
+                        name="telephone"
+                        className="store-form-input"
+                        value={profileData.telephone}
+                        onChange={handleProfileChange}
+                        disabled={!isEditingProfile}
+                        required
+                      />
+                    </div>
+                    <div className="store-form-group">
+                      <label className="store-form-label">Rôle</label>
+                      <input
+                        type="text"
+                        className="store-form-input"
+                        value={user.role === 'CLIENT' ? 'Client' : user.role || '-'}
+                        disabled
+                        style={{ backgroundColor: '#f3f4f6' }}
+                      />
+                    </div>
+                    <div className="store-form-group" style={{ gridColumn: '1 / -1' }}>
+                      <label className="store-form-label">Adresse de livraison *</label>
+                      <textarea
+                        name="adresseLivraison"
+                        className="store-form-input"
+                        value={profileData.adresseLivraison}
+                        onChange={handleProfileChange}
+                        disabled={!isEditingProfile}
+                        rows={3}
+                        required
+                        style={{ resize: 'vertical' }}
+                      />
+                    </div>
+                  </div>
+
+                  {isEditingProfile && (
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '20px', justifyContent: 'flex-end' }}>
+                      <button
+                        type="button"
+                        onClick={cancelProfileEdit}
+                        style={{
+                          padding: '10px 20px',
+                          background: '#f3f4f6',
+                          color: '#374151',
+                          border: 'none',
+                          borderRadius: 'var(--store-radius-sm)',
+                          cursor: 'pointer',
+                          fontSize: '14px'
+                        }}
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={profileLoading}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 20px',
+                          background: 'var(--store-primary)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: 'var(--store-radius-sm)',
+                          cursor: profileLoading ? 'not-allowed' : 'pointer',
+                          fontSize: '14px',
+                          opacity: profileLoading ? 0.7 : 1
+                        }}
+                      >
+                        <FiSave /> {profileLoading ? 'Enregistrement...' : 'Enregistrer'}
+                      </button>
+                    </div>
+                  )}
+                </form>
               </div>
             )}
           </div>

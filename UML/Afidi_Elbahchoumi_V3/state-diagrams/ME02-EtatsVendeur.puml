@@ -1,0 +1,42 @@
+@startuml ME02 - Etats Vendeur
+
+title ME02 - Machine a Etats : Compte Vendeur
+
+[*] --> EN_ATTENTE_APPROBATION : Inscription vendeur
+
+state EN_ATTENTE_APPROBATION {
+    EN_ATTENTE_APPROBATION : entry / estApprouve = false
+    EN_ATTENTE_APPROBATION : entry / notifier admin
+    EN_ATTENTE_APPROBATION : do / afficher message attente
+    EN_ATTENTE_APPROBATION : exit / enregistrer decision admin
+}
+
+EN_ATTENTE_APPROBATION --> APPROUVE : Admin approuve
+EN_ATTENTE_APPROBATION --> REJETE : Admin rejette
+
+state APPROUVE {
+    APPROUVE : entry / estApprouve = true
+    APPROUVE : entry / envoyer email bienvenue
+    APPROUVE : do / autoriser acces espace vendeur
+    APPROUVE : exit / sauvegarder etat
+}
+
+state REJETE {
+    REJETE : entry / envoyer email refus
+    REJETE : do / desactiver compte
+}
+
+APPROUVE --> SUSPENDU : Admin suspend
+
+state SUSPENDU {
+    SUSPENDU : entry / estApprouve = false
+    SUSPENDU : entry / notifier vendeur
+    SUSPENDU : do / bloquer acces vente
+    SUSPENDU : exit / enregistrer reactivation
+}
+
+SUSPENDU --> APPROUVE : Admin reactive
+
+REJETE --> [*]
+
+@enduml

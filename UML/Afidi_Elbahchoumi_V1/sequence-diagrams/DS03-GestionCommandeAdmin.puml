@@ -1,0 +1,133 @@
+@startuml DS03 - Gestion Commande Admin
+
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam sequenceMessageAlign center
+
+title DS03 - Gestion des Commandes par Admin (Cash on Delivery)
+
+actor Admin as A
+boundary "<<boundary>>\nCommandesPage" as CP
+control "<<control>>\nCommandeController" as CC
+entity "<<entity>>\nCommande" as CMD
+entity "<<entity>>\nProduit" as P
+
+== Consultation des Commandes ==
+
+A -> CP : listerCommandes()
+activate CP
+CP -> CC : getAllCommandes()
+activate CC
+CC -> CMD : findAll()
+activate CMD
+CMD --> CC : listeCommandes
+deactivate CMD
+CC --> CP : listeCommandes
+deactivate CC
+CP --> A : afficherTableauCommandes(listeCommandes)
+deactivate CP
+
+== Confirmation par Telephone ==
+
+A -> CP : selectionnerCommande(commandeId)
+activate CP
+CP -> CC : getCommandeDetail(commandeId)
+activate CC
+CC -> CMD : findById(commandeId)
+activate CMD
+CMD --> CC : commande
+deactivate CMD
+CC --> CP : commande
+deactivate CC
+CP --> A : afficherDetailCommande(commande)
+deactivate CP
+
+A -> A : appelerClient(telephone)
+
+alt Client confirme par telephone
+    A -> CP : confirmerCommande(commandeId)
+    activate CP
+    CP -> CC : updateStatut(commandeId, CONFIRMEE)
+    activate CC
+    CC -> CMD : setStatut(CONFIRMEE)
+    activate CMD
+    CMD --> CC : commandeConfirmee
+    deactivate CMD
+    CC --> CP : succes
+    deactivate CC
+    CP --> A : afficherConfirmation("Commande confirmee")
+    deactivate CP
+    
+    == Expedition ==
+    
+    A -> CP : expedierCommande(commandeId)
+    activate CP
+    CP -> CC : updateStatut(commandeId, EN_LIVRAISON)
+    activate CC
+    CC -> CMD : setStatut(EN_LIVRAISON)
+    activate CMD
+    CMD --> CC : commandeExpediee
+    deactivate CMD
+    CC --> CP : succes
+    deactivate CC
+    CP --> A : afficherConfirmation("Commande en livraison")
+    deactivate CP
+    
+    == Livraison ==
+    
+    alt Client accepte et paie
+        A -> CP : marquerLivree(commandeId)
+        activate CP
+        CP -> CC : updateStatut(commandeId, LIVREE)
+        activate CC
+        CC -> CMD : setStatut(LIVREE)
+        activate CMD
+        CMD --> CC : commandeLivree
+        deactivate CMD
+        CC --> CP : succes
+        deactivate CC
+        CP --> A : afficherConfirmation("Commande livree")
+        deactivate CP
+    else Client absent ou refuse
+        A -> CP : annulerCommande(commandeId)
+        activate CP
+        CP -> CC : annuler(commandeId)
+        activate CC
+        CC -> CMD : setStatut(ANNULEE)
+        activate CMD
+        CMD --> CC : commandeAnnulee
+        deactivate CMD
+        loop pour chaque ligneCommande
+            CC -> P : incrementerStock(produitId, quantite)
+            activate P
+            P --> CC : stockRestaure
+            deactivate P
+        end
+        CC --> CP : succes
+        deactivate CC
+        CP --> A : afficherConfirmation("Commande annulee, stock restaure")
+        deactivate CP
+    end
+
+else Client ne confirme pas
+    A -> CP : annulerCommande(commandeId)
+    activate CP
+    CP -> CC : annuler(commandeId)
+    activate CC
+    CC -> CMD : setStatut(ANNULEE)
+    activate CMD
+    CMD --> CC : commandeAnnulee
+    deactivate CMD
+    loop pour chaque ligneCommande
+        CC -> P : incrementerStock(produitId, quantite)
+        activate P
+        P --> CC : stockRestaure
+        deactivate P
+    end
+    CC --> CP : succes
+    deactivate CC
+    CP --> A : afficherConfirmation("Commande annulee, stock restaure")
+    deactivate CP
+end
+
+@enduml

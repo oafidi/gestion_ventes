@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import storeService from '../../services/storeService';
+import { getImageUrl } from '../../config/apiConfig';
 import { 
   FiShoppingCart, 
   FiUser, 
@@ -69,12 +70,6 @@ const StoreHome = () => {
     const title = product.titre || product.produitNom || '';
     return title.toLowerCase().includes(searchTerm.toLowerCase());
   });
-
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return null;
-    if (imagePath.startsWith('http')) return imagePath;
-    return `http://localhost:8080${imagePath}`;
-  };
 
   if (loading) {
     return (
@@ -232,7 +227,7 @@ export const StoreHeader = ({ searchTerm, setSearchTerm, cartCount, onCartClick 
     <header className="store-header">
       <div className="store-header-top">
         <div className="store-wrapper" style={{ display: 'flex', justifyContent: 'space-between', color: 'rgba(255,255,255,0.8)' }}>
-          <span><FiTruck style={{ marginRight: '8px' }} /> Livraison gratuite à partir de 500 DH</span>
+          <span><FiTruck style={{ marginRight: '8px' }} /> Livraison gratuite</span>
           <span><FiPhone style={{ marginRight: '8px' }} /> Service client: +212 5XX-XXXXXX</span>
         </div>
       </div>
@@ -293,12 +288,6 @@ export const StoreHeader = ({ searchTerm, setSearchTerm, cartCount, onCartClick 
 export const CartSidebar = ({ isOpen, onClose }) => {
   const { cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart } = useCart();
   const navigate = useNavigate();
-
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return null;
-    if (imagePath.startsWith('http')) return imagePath;
-    return `http://localhost:8080${imagePath}`;
-  };
 
   const handleCheckout = () => {
     onClose();

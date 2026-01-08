@@ -1,7 +1,6 @@
 package com.monsite.ventes.gestion_ventes.security;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -21,10 +20,11 @@ public class JwtTokenProvider {
     private long jwtExpiration;
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        // Utiliser la clé secrète directement (pas de décodage Base64)
+        byte[] keyBytes = jwtSecret.getBytes();
+        // S'assurer que la clé fait au moins 256 bits (32 bytes) pour HS256
         if (keyBytes.length < 32) {
-            // Si la clé est trop courte, utiliser la chaîne directement
-            return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+            throw new IllegalArgumentException("La clé JWT doit faire au moins 32 caractères");
         }
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -71,7 +71,11 @@ public class JwtTokenProvider {
                     .build()
                     .parseSignedClaims(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            System.out.println("JWT Token expiré: " + e.getMessage());
+            return false;
         } catch (JwtException | IllegalArgumentException e) {
+            System.out.println("JWT Token invalide: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             return false;
         }
     }

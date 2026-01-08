@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import vendeurService from '../../services/vendeurService';
+import ConfirmModal from '../../components/ConfirmModal';
 import './Vendeurs.css';
 
 const Vendeurs = () => {
@@ -11,6 +12,10 @@ const Vendeurs = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVendeur, setSelectedVendeur] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  
+  // États pour la modale de confirmation
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmAction, setConfirmAction] = useState({ type: '', id: null, title: '', message: '' });
 
   // Charger les vendeurs
   const fetchVendeurs = async () => {
@@ -44,31 +49,44 @@ const Vendeurs = () => {
   };
 
   // Bannir un vendeur
-  const handleBannirVendeur = async (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir bannir ce vendeur ? Il ne pourra plus vendre.')) {
-      try {
-        await vendeurService.bannirVendeur(id);
-        setSuccess('Vendeur banni avec succès');
-        fetchVendeurs();
-        setTimeout(() => setSuccess(null), 3000);
-      } catch (err) {
-        setError('Erreur lors du bannissement');
-      }
-    }
+  const handleBannirVendeur = (id) => {
+    setConfirmAction({
+      type: 'bannir',
+      id,
+      title: 'Bannir le vendeur',
+      message: 'Êtes-vous sûr de vouloir bannir ce vendeur ? Il ne pourra plus vendre.'
+    });
+    setShowConfirmModal(true);
   };
 
   // Supprimer un vendeur
-  const handleSupprimerVendeur = async (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer définitivement ce vendeur ?')) {
-      try {
-        await vendeurService.rejeterVendeur(id);
+  const handleSupprimerVendeur = (id) => {
+    setConfirmAction({
+      type: 'supprimer',
+      id,
+      title: 'Supprimer le vendeur',
+      message: 'Êtes-vous sûr de vouloir supprimer définitivement ce vendeur ?'
+    });
+    setShowConfirmModal(true);
+  };
+
+  // Confirmer l'action
+  const confirmVendeurAction = async () => {
+    try {
+      if (confirmAction.type === 'bannir') {
+        await vendeurService.bannirVendeur(confirmAction.id);
+        setSuccess('Vendeur banni avec succès');
+      } else if (confirmAction.type === 'supprimer') {
+        await vendeurService.rejeterVendeur(confirmAction.id);
         setSuccess('Vendeur supprimé');
-        fetchVendeurs();
-        setTimeout(() => setSuccess(null), 3000);
-      } catch (err) {
-        setError('Erreur lors de la suppression');
       }
+      fetchVendeurs();
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError(`Erreur lors de l'opération`);
     }
+    setShowConfirmModal(false);
+    setConfirmAction({ type: '', id: null, title: '', message: '' });
   };
 
   // Voir les détails d'un vendeur
@@ -293,6 +311,16 @@ const Vendeurs = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={confirmVendeurAction}
+        title={confirmAction.title}
+        message={confirmAction.message}
+        confirmText={confirmAction.type === 'bannir' ? 'Bannir' : 'Supprimer'}
+        type="danger"
+      />
     </div>
   );
 };

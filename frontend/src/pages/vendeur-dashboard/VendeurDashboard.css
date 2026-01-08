@@ -5,10 +5,10 @@
   background: var(--gray-50);
 }
 
-/* Sidebar */
+/* Sidebar - Même style que l'admin */
 .vendeur-sidebar {
   width: 280px;
-  background: linear-gradient(180deg, #0c4a6e 0%, #075985 100%);
+  background: var(--gray-900);
   color: white;
   display: flex;
   flex-direction: column;
@@ -29,12 +29,12 @@
 .vendeur-sidebar .sidebar-logo {
   width: 44px;
   height: 44px;
-  background: var(--vendeur-gradient);
+  background: var(--gradient-primary);
   border-radius: var(--radius-xl);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
 .vendeur-sidebar .sidebar-logo svg {
@@ -72,9 +72,9 @@
 }
 
 .vendeur-sidebar .nav-item.active {
-  background: rgba(14, 165, 233, 0.2);
+  background: var(--primary-600);
   color: white;
-  border-left-color: var(--vendeur-primary);
+  border-left-color: var(--primary-400);
 }
 
 .vendeur-sidebar .nav-item svg {
@@ -1607,3 +1607,114 @@
   }
 }
 
+/* ==================== PROFIL VENDEUR ==================== */
+.profile-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-md);
+}
+
+.profile-card .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-5);
+}
+
+.profile-card .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.profile-card .form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.profile-card .form-group label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.profile-card .form-group input,
+.profile-card .form-group textarea {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-base);
+  transition: all var(--transition-base);
+}
+
+.profile-card .form-group input:focus,
+.profile-card .form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.profile-card .form-group input.disabled,
+.profile-card .form-group textarea.disabled {
+  background-color: var(--gray-100);
+  color: var(--gray-500);
+  cursor: not-allowed;
+}
+
+.profile-card .form-group small {
+  font-size: var(--text-xs);
+  color: var(--gray-500);
+}
+
+.profile-card .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--gray-200);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.alert {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-5);
+  font-size: var(--text-sm);
+}
+
+.alert-success {
+  background-color: var(--success-50);
+  color: var(--success-700);
+  border: 1px solid var(--success-200);
+}
+
+.alert-error {
+  background-color: var(--error-light);
+  color: var(--error-dark);
+  border: 1px solid var(--error);
+}
+
+@media (max-width: 768px) {
+  .profile-card .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+}

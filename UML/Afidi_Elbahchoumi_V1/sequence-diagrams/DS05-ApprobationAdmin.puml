@@ -1,0 +1,123 @@
+@startuml DS05 - Approbation Admin
+
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam sequenceMessageAlign center
+
+title DS05 - Approbation par l'Administrateur
+
+actor Admin as A
+boundary "<<boundary>>\nAdminPage" as AP
+control "<<control>>\nVendeurController" as VC
+control "<<control>>\nVendeurProduitController" as VPC
+entity "<<entity>>\nVendeur" as V
+entity "<<entity>>\nVendeurProduit" as VP
+
+== Approbation des Vendeurs ==
+
+A -> AP : listerVendeursEnAttente()
+activate AP
+AP -> VC : getVendeursNonApprouves()
+activate VC
+VC -> V : findByEstApprouve(false)
+activate V
+V --> VC : listeVendeurs
+deactivate V
+VC --> AP : listeVendeurs
+deactivate VC
+AP --> A : afficherListeVendeurs(listeVendeurs)
+deactivate AP
+
+A -> AP : consulterVendeur(vendeurId)
+activate AP
+AP -> VC : getVendeurDetail(vendeurId)
+activate VC
+VC -> V : findById(vendeurId)
+activate V
+V --> VC : vendeur
+deactivate V
+VC --> AP : vendeur
+deactivate VC
+AP --> A : afficherProfilVendeur(vendeur)
+deactivate AP
+
+alt decision = approuver
+    A -> AP : approuverVendeur(vendeurId)
+    activate AP
+    AP -> VC : approuver(vendeurId)
+    activate VC
+    VC -> V : setEstApprouve(true)
+    activate V
+    V --> VC : vendeurApprouve
+    deactivate V
+    VC -> V : save(vendeur)
+    activate V
+    V --> VC : vendeurSauvegarde
+    deactivate V
+    VC --> AP : succes
+    deactivate VC
+    AP --> A : afficherConfirmation("Vendeur approuve")
+    deactivate AP
+else decision = rejeter
+    A -> AP : rejeterVendeur(vendeurId)
+    activate AP
+    AP -> VC : rejeter(vendeurId)
+    activate VC
+    VC -> V : delete(vendeurId)
+    activate V
+    V --> VC : vendeurSupprime
+    deactivate V
+    VC --> AP : succes
+    deactivate VC
+    AP --> A : afficherConfirmation("Vendeur rejete")
+    deactivate AP
+end
+
+== Approbation des Offres ==
+
+A -> AP : listerOffresEnAttente()
+activate AP
+AP -> VPC : getOffresNonApprouvees()
+activate VPC
+VPC -> VP : findByEstApprouve(false)
+activate VP
+VP --> VPC : listeOffres
+deactivate VP
+VPC --> AP : listeOffres
+deactivate VPC
+AP --> A : afficherListeOffres(listeOffres)
+deactivate AP
+
+alt decision = approuver
+    A -> AP : approuverOffre(offreId)
+    activate AP
+    AP -> VPC : approuver(offreId)
+    activate VPC
+    VPC -> VP : setEstApprouve(true)
+    activate VP
+    VP --> VPC : offreApprouvee
+    deactivate VP
+    VPC -> VP : save(offre)
+    activate VP
+    VP --> VPC : offreSauvegardee
+    deactivate VP
+    VPC --> AP : succes
+    deactivate VPC
+    AP --> A : afficherConfirmation("Offre approuvee")
+    deactivate AP
+else decision = rejeter
+    A -> AP : rejeterOffre(offreId)
+    activate AP
+    AP -> VPC : rejeter(offreId)
+    activate VPC
+    VPC -> VP : delete(offreId)
+    activate VP
+    VP --> VPC : offreSupprimee
+    deactivate VP
+    VPC --> AP : succes
+    deactivate VPC
+    AP --> A : afficherConfirmation("Offre rejetee")
+    deactivate AP
+end
+
+@enduml

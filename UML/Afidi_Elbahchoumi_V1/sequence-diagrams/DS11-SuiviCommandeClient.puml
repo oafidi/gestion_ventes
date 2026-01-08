@@ -1,0 +1,109 @@
+@startuml DS11 - Suivi Commande Client
+
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam sequenceMessageAlign center
+
+title DS11 - Suivi de Commande par le Client
+
+actor Client as C
+boundary "<<boundary>>\nMonComptePage" as MCP
+control "<<control>>\nCommandeController" as CC
+entity "<<entity>>\nCommande" as CMD
+entity "<<entity>>\nLigneCommande" as LC
+
+== Acces aux Commandes ==
+
+C -> MCP : accederMonCompte()
+activate MCP
+MCP --> C : afficherMenuCompte()
+deactivate MCP
+
+C -> MCP : consulterMesCommandes()
+activate MCP
+MCP -> CC : getMesCommandes(clientId)
+activate CC
+CC -> CMD : findByClientId(clientId)
+activate CMD
+CMD --> CC : listeCommandes
+deactivate CMD
+CC --> MCP : listeCommandes
+deactivate CC
+MCP --> C : afficherHistorique(listeCommandes)
+deactivate MCP
+
+== Detail d'une Commande ==
+
+C -> MCP : consulterCommande(commandeId)
+activate MCP
+MCP -> CC : getCommandeDetail(commandeId)
+activate CC
+CC -> CMD : findById(commandeId)
+activate CMD
+CMD --> CC : commande
+deactivate CMD
+CC -> LC : findByCommandeId(commandeId)
+activate LC
+LC --> CC : lignesCommande
+deactivate LC
+CC --> MCP : commandeDetail(commande, lignes)
+deactivate CC
+MCP --> C : afficherDetailCommande(commande, lignes)
+deactivate MCP
+
+== Suivi en Temps Reel ==
+
+C -> MCP : suivreCommande(commandeId)
+activate MCP
+MCP -> CC : getHistoriqueStatuts(commandeId)
+activate CC
+CC -> CMD : getHistoriqueStatuts(commandeId)
+activate CMD
+CMD --> CC : historiqueStatuts
+deactivate CMD
+CC --> MCP : timeline(historiqueStatuts)
+deactivate CC
+MCP --> C : afficherTimeline(historiqueStatuts)
+deactivate MCP
+
+== Annulation ==
+
+C -> MCP : demanderAnnulation(commandeId)
+activate MCP
+MCP -> CC : verifierAnnulationPossible(commandeId)
+activate CC
+CC -> CMD : findById(commandeId)
+activate CMD
+CMD --> CC : commande
+deactivate CMD
+
+alt statut in [EN_ATTENTE, CONFIRMEE]
+    CC --> MCP : annulationPossible
+    deactivate CC
+    MCP --> C : demanderConfirmation()
+    deactivate MCP
+    
+    C -> MCP : confirmerAnnulation(commandeId)
+    activate MCP
+    MCP -> CC : annulerCommande(commandeId)
+    activate CC
+    CC -> CMD : setStatut(ANNULEE)
+    activate CMD
+    CMD --> CC : commandeAnnulee
+    deactivate CMD
+    CC -> CMD : restaurerStock(commandeId)
+    activate CMD
+    CMD --> CC : stockRestaure
+    deactivate CMD
+    CC --> MCP : succes
+    deactivate CC
+    MCP --> C : afficherConfirmation("Commande annulee")
+    deactivate MCP
+else statut in [EN_LIVRAISON, LIVREE]
+    CC --> MCP : erreur("Annulation impossible")
+    deactivate CC
+    MCP --> C : afficherErreur("Contactez le service client")
+    deactivate MCP
+end
+
+@enduml

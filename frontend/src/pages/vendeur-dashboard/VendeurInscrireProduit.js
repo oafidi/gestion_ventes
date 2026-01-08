@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import vendeurProduitService from '../../services/vendeurProduitService';
 import categorieService from '../../services/categorieService';
-
-const API_BASE_URL = 'http://localhost:8080';
+import { BACKEND_URL } from '../../config/apiConfig';
 
 const VendeurInscrireProduit = () => {
   const [produits, setProduits] = useState([]);
@@ -48,13 +47,13 @@ const VendeurInscrireProduit = () => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
     if (imagePath.startsWith('http')) return imagePath;
-    return `${API_BASE_URL}${imagePath}`;
+    return `${BACKEND_URL}${imagePath}`;
   };
 
   const formatPrice = (prix) => {
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat('fr-MA', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'MAD'
     }).format(prix);
   };
 
@@ -278,7 +277,7 @@ const VendeurInscrireProduit = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="prixVendeur">Votre prix de vente (€) *</label>
+                <label htmlFor="prixVendeur">Votre prix de vente (DH) *</label>
                 <input
                   type="number"
                   id="prixVendeur"

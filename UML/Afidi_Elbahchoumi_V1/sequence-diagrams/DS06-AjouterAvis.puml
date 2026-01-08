@@ -1,0 +1,76 @@
+@startuml DS06 - Ajouter Avis
+
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam sequenceMessageAlign center
+
+title DS06 - Systeme d'Avis Client
+
+actor Client as C
+boundary "<<boundary>>\nProduitPage" as PP
+control "<<control>>\nAvisController" as AC
+entity "<<entity>>\nAvis" as A
+entity "<<entity>>\nVendeurProduit" as VP
+
+== Consultation des Avis ==
+
+C -> PP : consulterProduit(produitId)
+activate PP
+PP -> AC : getAvisProduit(produitId)
+activate AC
+AC -> A : findByProduitId(produitId)
+activate A
+A --> AC : listeAvis
+deactivate A
+AC -> A : calculerNoteMoyenne(listeAvis)
+activate A
+A --> AC : noteMoyenne
+deactivate A
+AC --> PP : avisData(listeAvis, noteMoyenne)
+deactivate AC
+PP --> C : afficherAvis(listeAvis, noteMoyenne)
+deactivate PP
+
+== Ajout d'un Avis ==
+
+C -> PP : donnerAvis(produitId)
+activate PP
+PP -> AC : verifierAvisExistant(clientId, produitId)
+activate AC
+AC -> A : findByClientAndProduit(clientId, produitId)
+activate A
+A --> AC : avisExistant
+deactivate A
+
+alt avis existe deja
+    AC --> PP : erreur("Avis existant")
+    PP --> C : afficherErreur("Vous avez deja donne un avis")
+else pas d'avis existant
+    AC --> PP : eligible
+    deactivate AC
+    PP --> C : afficherFormulaireAvis()
+    deactivate PP
+    
+    C -> PP : soumettreAvis(note, commentaire)
+    activate PP
+    PP -> AC : creerAvis(clientId, produitId, note, commentaire)
+    activate AC
+    AC -> A : create(client, produit, note, commentaire)
+    activate A
+    A --> AC : nouvelAvis
+    deactivate A
+    AC -> A : save(avis)
+    activate A
+    A --> AC : avisSauvegarde
+    deactivate A
+    AC -> VP : recalculerNoteMoyenne(produitId)
+    activate VP
+    VP --> AC : noteMiseAJour
+    deactivate VP
+    AC --> PP : succes(avis)
+    deactivate AC
+    PP --> C : afficherConfirmation("Merci pour votre avis")
+    deactivate PP
+end
+
+@enduml

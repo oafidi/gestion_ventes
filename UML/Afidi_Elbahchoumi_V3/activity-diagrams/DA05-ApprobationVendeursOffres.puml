@@ -1,0 +1,50 @@
+@startuml DA05 - Approbation Vendeurs et Offres
+
+title DA05 - Approbation des Vendeurs et Offres
+
+start
+
+:Acceder au tableau de bord admin;
+
+fork
+    :Consulter vendeurs en attente;
+fork again
+    :Consulter offres en attente;
+end fork
+
+partition "Approbation Vendeurs" {
+    while (Vendeurs a traiter ?) is (oui)
+        :Selectionner un vendeur;
+        :Examiner le profil;
+        
+        switch (Decision ?)
+        case (Approuver)
+            :estApprouve = true;
+            :Notifier vendeur "Compte approuve";
+        case (Rejeter)
+            :Supprimer le compte;
+            :Notifier vendeur "Demande rejetee";
+        endswitch
+    endwhile (non)
+}
+
+partition "Approbation Offres" {
+    while (Offres a traiter ?) is (oui)
+        :Selectionner une offre;
+        :Examiner les details;
+        
+        switch (Decision ?)
+        case (Approuver)
+            :estApprouve = true;
+            :Rendre offre visible en boutique;
+            :Notifier vendeur "Offre approuvee";
+        case (Rejeter)
+            :Supprimer l'offre;
+            :Notifier vendeur "Offre rejetee";
+        endswitch
+    endwhile (non)
+}
+
+stop
+
+@enduml

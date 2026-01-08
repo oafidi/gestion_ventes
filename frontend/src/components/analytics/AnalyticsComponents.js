@@ -4,6 +4,7 @@
  */
 import React from 'react';
 import { FiTrendingUp, FiTrendingDown, FiMinus, FiAlertCircle, FiCheckCircle, FiInfo, FiStar } from 'react-icons/fi';
+import { BACKEND_URL } from '../../config/apiConfig';
 import './AnalyticsComponents.css';
 
 // ==================== KPI CARD ====================
@@ -74,8 +75,8 @@ export const StatCard = ({ label, value, description, icon: Icon }) => (
 const getImageUrl = (imagePath) => {
   if (!imagePath) return null;
   if (imagePath.startsWith('http')) return imagePath;
-  if (imagePath.startsWith('/uploads')) return `http://localhost:8080${imagePath}`;
-  return `http://localhost:8080/uploads/vendeur-produits/${imagePath}`;
+  if (imagePath.startsWith('/uploads')) return `${BACKEND_URL}${imagePath}`;
+  return `${BACKEND_URL}/uploads/vendeur-produits/${imagePath}`;
 };
 
 export const ProductCard = ({ product, rank }) => {

@@ -1,0 +1,38 @@
+@startuml DA06 - Gestion Avis
+
+title DA06 - Gestion des Avis
+
+start
+
+:Consulter un produit;
+:Afficher avis existants et note moyenne;
+
+:Cliquer sur "Donner mon avis";
+
+:Verifier si avis deja donne;
+
+if (Avis deja donne ?) then (oui)
+    :Afficher avis existant;
+    
+    if (Modifier l'avis ?) then (oui)
+        :Modifier l'avis;
+    else (non)
+        stop
+    endif
+else (non)
+    :Afficher formulaire avis;
+endif
+
+:Saisir note et commentaire;
+:Soumettre l'avis;
+
+:Enregistrer l'avis;
+:Recalculer note moyenne du produit;
+
+:Afficher "Merci pour votre avis";
+
+:Notifier le vendeur;
+
+stop
+
+@enduml

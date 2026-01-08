@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface CommandeRepository extends JpaRepository<Commande, Long> {
     List<Commande> findByClientId(Long clientId);
     List<Commande> findByStatut(Commande.StatutCommande statut);
+    boolean existsByClientId(Long clientId);
     
     @Query("SELECT DISTINCT c FROM Commande c " +
            "LEFT JOIN FETCH c.client " +

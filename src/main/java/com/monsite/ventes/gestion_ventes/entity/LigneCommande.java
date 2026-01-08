@@ -5,13 +5,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "lignes_commande")
 @Data
+@EqualsAndHashCode(exclude = {"commande", "vendeurProduit"})
+@ToString(exclude = {"commande", "vendeurProduit"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class LigneCommande {

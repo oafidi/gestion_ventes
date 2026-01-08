@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,8 @@ import java.util.List;
 @Entity
 @Table(name = "categories")
 @Data
+@EqualsAndHashCode(exclude = {"produits"})
+@ToString(exclude = {"produits"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class Categorie {

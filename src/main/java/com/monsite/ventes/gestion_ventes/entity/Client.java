@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,8 @@ import java.util.List;
 @Entity
 @Table(name = "clients")
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"commandes", "avis", "panier"})
+@ToString(exclude = {"commandes", "avis", "panier"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class Client extends Utilisateur {
@@ -28,6 +30,10 @@ public class Client extends Utilisateur {
     @JsonIgnore
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Avis> avis = new ArrayList<>();
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Panier panier;
 
     public Client(Long id, String nom, String email, String motDePasse, String telephone, String adresseLivraison) {
         super(id, nom, email, motDePasse, telephone, Role.CLIENT);

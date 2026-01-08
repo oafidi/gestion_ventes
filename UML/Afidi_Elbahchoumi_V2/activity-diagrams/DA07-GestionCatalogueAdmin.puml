@@ -1,0 +1,53 @@
+@startuml DA07 - Gestion Catalogue Admin
+
+title DA07 - Gestion du Catalogue Produits
+
+start
+
+:Acceder a la gestion des produits;
+:Afficher liste des produits;
+
+switch (Action ?)
+
+case (Creer produit)
+    :Afficher formulaire creation;
+    :Saisir nom, description, prix, categorie, image;
+    :Valider la creation;
+    
+    if (Informations valides ?) then (oui)
+        :Creer le produit;
+        :Afficher "Produit cree";
+    else (non)
+        :Afficher erreurs;
+    endif
+
+case (Modifier produit)
+    :Selectionner un produit;
+    :Afficher formulaire pre-rempli;
+    :Modifier les informations;
+    :Enregistrer modifications;
+    :Afficher "Produit modifie";
+
+case (Gerer stock)
+    :Afficher etat des stocks;
+    :Selectionner un produit;
+    :Saisir nouvelle quantite;
+    :Mettre a jour le stock;
+    :Afficher "Stock mis a jour";
+
+case (Supprimer produit)
+    :Selectionner un produit;
+    
+    if (Offres vendeurs liees ?) then (oui)
+        :Afficher avertissement;
+    endif
+    
+    :Confirmer suppression;
+    :Supprimer produit et offres liees;
+    :Afficher "Produit supprime";
+
+endswitch
+
+stop
+
+@enduml

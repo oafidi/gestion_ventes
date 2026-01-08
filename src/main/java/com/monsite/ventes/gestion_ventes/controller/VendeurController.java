@@ -121,4 +121,29 @@ public class VendeurController {
         }
         return ResponseEntity.badRequest().body(response);
     }
+
+    // ========== Gestion du Profil ==========
+
+    @GetMapping("/profil")
+    public ResponseEntity<Vendeur> getMonProfil(@AuthenticationPrincipal Vendeur vendeur) {
+        return ResponseEntity.ok(vendeur);
+    }
+
+    @PutMapping("/profil")
+    public ResponseEntity<MessageResponse> updateProfil(
+            @AuthenticationPrincipal Vendeur vendeur,
+            @RequestBody Vendeur vendeurDetails) {
+        
+        vendeur.setNom(vendeurDetails.getNom());
+        vendeur.setTelephone(vendeurDetails.getTelephone());
+        // Note: On ne modifie pas l'email pour des raisons de sécurité
+        
+        // Sauvegarder via le repository (besoin d'injecter VendeurRepository)
+        vendeurProduitService.updateVendeurProfil(vendeur);
+        
+        return ResponseEntity.ok(MessageResponse.builder()
+                .success(true)
+                .message("Profil mis à jour avec succès")
+                .build());
+    }
 }

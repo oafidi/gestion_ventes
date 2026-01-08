@@ -1,0 +1,60 @@
+@startuml UC00 - Vue Globale Application
+
+left to right direction
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam shadowing false
+
+' === Acteurs a gauche ===
+actor Client as C
+actor Vendeur as V
+actor Admin as A
+
+' === Systeme ===
+rectangle "Application Gestion des Ventes" {
+    
+    ' === Cas d'utilisation Client ===
+    (S'authentifier) as UC0
+    (Parcourir le catalogue) as UC1
+    (Gerer le panier) as UC2
+    (Passer une commande) as UC3
+    (Suivre mes commandes) as UC4
+    (Donner un avis) as UC5
+    
+    ' === Cas d'utilisation Vendeur ===
+    (S'inscrire a un produit) as UC6
+    (Consulter mes ventes) as UC7
+    (Gerer mes avis) as UC8
+    
+    ' === Cas d'utilisation Admin ===
+    (Gerer les produits) as UC9
+    (Gerer les categories) as UC10
+    (Gerer les vendeurs) as UC11
+    (Gerer les commandes) as UC12
+    (Consulter les statistiques) as UC13
+}
+
+' === Associations Client ===
+C -- UC0
+C -- UC1
+C -- UC2
+C -- UC3
+C -- UC4
+C -- UC5
+
+' === Associations Vendeur ===
+V -- UC0
+V -- UC1
+V -- UC6
+V -- UC7
+V -- UC8
+
+' === Associations Admin ===
+A -- UC0
+A -- UC9
+A -- UC10
+A -- UC11
+A -- UC12
+A -- UC13
+
+@enduml

@@ -8,7 +8,7 @@ import '../../styles/Store.css';
 
 const StoreLogin = () => {
   const navigate = useNavigate();
-  const { getCartCount } = useCart();
+  const { getCartCount, syncWithUser } = useCart();
   const [searchTerm, setSearchTerm] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -44,14 +44,23 @@ const StoreLogin = () => {
     try {
       const response = await storeService.login(formData.email, formData.password);
       if (response.success) {
+        // Vérifier que l'utilisateur est un CLIENT
+        if (response.role !== 'CLIENT') {
+          setError('Cette page est réservée aux clients. Les vendeurs et administrateurs doivent utiliser leurs portails respectifs.');
+          setLoading(false);
+          return;
+        }
+        
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify({
           id: response.id,
           nom: response.nom,
           email: response.email,
           telephone: response.telephone,
-          role: response.role
+          role: response.role,
+          adresseLivraison: response.adresseLivraison
         }));
+        syncWithUser(); // Synchroniser le panier avec l'utilisateur connecté
         navigate('/store');
       } else {
         setError(response.message || 'Email ou mot de passe incorrect');
@@ -85,6 +94,7 @@ const StoreLogin = () => {
           telephone: response.telephone,
           role: response.role
         }));
+        syncWithUser(); // Synchroniser le panier avec l'utilisateur connecté
         navigate('/store');
       } else {
         setError(response.message || 'Erreur lors de l\'inscription');

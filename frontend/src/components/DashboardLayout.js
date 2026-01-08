@@ -131,6 +131,7 @@ const menuConfig = {
         title: 'Gestion',
         items: [
           { path: '/dashboard/commandes', icon: 'shoppingCart', label: 'Commandes' },
+          { path: '/dashboard/import-commandes', icon: 'plus', label: 'Import CSV', badge: 'Nouveau' },
           { path: '/dashboard/statistiques', icon: 'barChart', label: 'Statistiques' },
         ]
       }

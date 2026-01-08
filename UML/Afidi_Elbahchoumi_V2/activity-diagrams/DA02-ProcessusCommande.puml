@@ -1,0 +1,54 @@
+@startuml DA02 - Processus Commande
+
+title DA02 - Processus de Commande
+
+start
+
+:Acceder a la boutique;
+:Afficher le catalogue;
+
+repeat
+    :Parcourir les produits;
+    :Consulter fiche produit;
+    
+    if (Produit interessant ?) then (oui)
+        :Selectionner quantite;
+        :Verifier disponibilite stock;
+        
+        if (Stock suffisant ?) then (oui)
+            :Ajouter au panier;
+        else (non)
+            :Afficher "Stock insuffisant";
+        endif
+    endif
+    
+repeat while (Continuer les achats ?) is (oui)
+
+:Acceder au panier;
+:Afficher recapitulatif;
+
+if (Panier OK ?) then (non)
+    :Modifier les quantites;
+else (oui)
+    :Proceder a la commande;
+endif
+
+:Saisir adresse de livraison;
+:Saisir telephone;
+
+fork
+    :Calculer montant total;
+fork again
+    :Verifier informations client;
+end fork
+
+:Creer la commande;
+:Reserver le stock;
+:Statut = EN_ATTENTE;
+
+:Afficher confirmation;
+:Envoyer email confirmation;
+
+stop
+
+@enduml

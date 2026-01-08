@@ -1,6 +1,7 @@
 package com.monsite.ventes.gestion_ventes.controller;
 
 import com.monsite.ventes.gestion_ventes.dto.CommandeResponse;
+import com.monsite.ventes.gestion_ventes.dto.CsvImportResult;
 import com.monsite.ventes.gestion_ventes.dto.MessageResponse;
 import com.monsite.ventes.gestion_ventes.dto.VendeurProduitResponse;
 import com.monsite.ventes.gestion_ventes.entity.Categorie;
@@ -10,9 +11,13 @@ import com.monsite.ventes.gestion_ventes.entity.Vendeur;
 import com.monsite.ventes.gestion_ventes.entity.VendeurProduit;
 import com.monsite.ventes.gestion_ventes.service.AdminService;
 import com.monsite.ventes.gestion_ventes.service.CommandeService;
+import com.monsite.ventes.gestion_ventes.service.CsvImportService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -24,10 +29,12 @@ public class AdminController {
 
     private final AdminService adminService;
     private final CommandeService commandeService;
+    private final CsvImportService csvImportService;
 
-    public AdminController(AdminService adminService, CommandeService commandeService) {
+    public AdminController(AdminService adminService, CommandeService commandeService, CsvImportService csvImportService) {
         this.adminService = adminService;
         this.commandeService = commandeService;
+        this.csvImportService = csvImportService;
     }
 
     // ========== Gestion des Vendeurs ==========
@@ -226,5 +233,74 @@ public class AdminController {
     @GetMapping("/statistiques")
     public ResponseEntity<Map<String, Object>> getStatistiques() {
         return ResponseEntity.ok(adminService.getStatistiques());
+    }
+
+    // ========== Import CSV Commandes ==========
+
+    /**
+     * Importe les commandes depuis un fichier CSV
+     */
+    @PostMapping(value = "/commandes/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CsvImportResult> importerCommandes(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                CsvImportResult.builder()
+                    .success(false)
+                    .message("Le fichier est vide")
+                    .build()
+            );
+        }
+
+        String filename = file.getOriginalFilename();
+        if (filename == null || (!filename.endsWith(".csv") && !filename.endsWith(".CSV"))) {
+            return ResponseEntity.badRequest().body(
+                CsvImportResult.builder()
+                    .success(false)
+                    .message("Le fichier doit être au format CSV")
+                    .build()
+            );
+        }
+
+        CsvImportResult result = csvImportService.importerCommandes(file);
+        if (result.isSuccess()) {
+            return ResponseEntity.ok(result);
+        }
+        return ResponseEntity.badRequest().body(result);
+    }
+
+    /**
+     * Valide un fichier CSV sans l'importer
+     */
+    @PostMapping(value = "/commandes/valider-csv", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<CsvImportResult> validerCsv(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body(
+                CsvImportResult.builder()
+                    .success(false)
+                    .message("Le fichier est vide")
+                    .build()
+            );
+        }
+
+        CsvImportResult result = csvImportService.validerCsv(file);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Télécharge un exemple de fichier CSV
+     */
+    @GetMapping("/commandes/exemple-csv")
+    public ResponseEntity<byte[]> telechargerExempleCsv() {
+        String csvContent = csvImportService.genererExempleCsv();
+        byte[] csvBytes = csvContent.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("text/csv; charset=UTF-8"));
+        headers.setContentDispositionFormData("attachment", "exemple_commandes.csv");
+        headers.setContentLength(csvBytes.length);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(csvBytes);
     }
 }

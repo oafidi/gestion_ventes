@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import vendeurProduitService from '../../services/vendeurProduitService';
+import { BACKEND_URL } from '../../config/apiConfig';
 import './VendeurDashboard.css';
-
-const API_BASE_URL = 'http://localhost:8080';
 
 const VendeurModifierProduit = () => {
   const { id } = useParams();
@@ -54,13 +53,13 @@ const VendeurModifierProduit = () => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
     if (imagePath.startsWith('http')) return imagePath;
-    return `${API_BASE_URL}${imagePath}`;
+    return `${BACKEND_URL}${imagePath}`;
   };
 
   const formatPrice = (prix) => {
-    return new Intl.NumberFormat('fr-FR', {
+    return new Intl.NumberFormat('fr-MA', {
       style: 'currency',
-      currency: 'EUR'
+      currency: 'MAD'
     }).format(prix);
   };
 
@@ -260,7 +259,7 @@ const VendeurModifierProduit = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="prixVendeur">Votre prix de vente (€) *</label>
+            <label htmlFor="prixVendeur">Votre prix de vente (DH) *</label>
             <input
               type="number"
               id="prixVendeur"

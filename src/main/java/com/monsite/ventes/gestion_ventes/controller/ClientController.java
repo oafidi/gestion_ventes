@@ -31,6 +31,20 @@ public class ClientController {
         this.commandeService = commandeService;
     }
 
+    @GetMapping("/debug")
+    public ResponseEntity<?> debugAuth(@AuthenticationPrincipal Utilisateur utilisateur) {
+        logger.info("=== DEBUG AUTH CLIENT ===");
+        if (utilisateur == null) {
+            logger.error("Utilisateur NULL");
+            return ResponseEntity.status(401).body("Utilisateur non authentifié");
+        }
+        logger.info("ID: {}", utilisateur.getId());
+        logger.info("Email: {}", utilisateur.getEmail());
+        logger.info("Role: {}", utilisateur.getRole());
+        logger.info("Authorities: {}", utilisateur.getAuthorities());
+        return ResponseEntity.ok("Auth OK - Role: " + utilisateur.getRole() + ", Email: " + utilisateur.getEmail());
+    }
+
     @GetMapping("/profil")
     public ResponseEntity<Client> getMonProfil(@AuthenticationPrincipal Utilisateur utilisateur) {
         Client client = clientRepository.findById(utilisateur.getId())

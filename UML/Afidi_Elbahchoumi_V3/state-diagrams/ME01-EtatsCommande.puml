@@ -1,0 +1,50 @@
+@startuml ME01 - Etats Commande
+
+title ME01 - Machine a Etats : Commande (Cash on Delivery)
+
+[*] --> EN_ATTENTE : Client passe commande
+
+state EN_ATTENTE {
+    EN_ATTENTE : entry / reserver stock
+    EN_ATTENTE : entry / notifier admin
+    EN_ATTENTE : do / attendre appel confirmation
+    EN_ATTENTE : exit / enregistrer decision
+}
+
+EN_ATTENTE --> CONFIRMEE : Admin appelle et client confirme
+EN_ATTENTE --> ANNULEE : Client ne confirme pas par telephone
+
+state CONFIRMEE {
+    CONFIRMEE : entry / notifier client
+    CONFIRMEE : do / preparer colis
+    CONFIRMEE : exit / generer bordereau expedition
+}
+
+CONFIRMEE --> EN_LIVRAISON : Colis expedie
+
+state EN_LIVRAISON {
+    EN_LIVRAISON : entry / generer numero suivi
+    EN_LIVRAISON : entry / notifier client
+    EN_LIVRAISON : do / suivre acheminement
+    EN_LIVRAISON : exit / confirmer arrivee livreur
+}
+
+EN_LIVRAISON --> LIVREE : Client accepte et paie en especes
+EN_LIVRAISON --> ANNULEE : Client absent ou refuse
+
+state LIVREE {
+    LIVREE : entry / confirmer paiement especes
+    LIVREE : entry / notifier client
+    LIVREE : do / archiver commande
+}
+
+state ANNULEE {
+    ANNULEE : entry / restaurer stock
+    ANNULEE : entry / notifier client
+    ANNULEE : do / archiver commande
+}
+
+LIVREE --> [*]
+ANNULEE --> [*]
+
+@enduml

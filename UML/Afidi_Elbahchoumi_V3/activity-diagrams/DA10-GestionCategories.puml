@@ -1,0 +1,45 @@
+@startuml DA10 - Gestion Categories
+
+title DA10 - Gestion des Categories
+
+start
+
+:Acceder a la gestion des categories;
+:Afficher liste des categories;
+
+switch (Action ?)
+
+case (Creer categorie)
+    :Saisir nom, description, image;
+    :Verifier unicite du nom;
+    
+    if (Nom existe deja ?) then (oui)
+        :Afficher erreur "Nom deja utilise";
+    else (non)
+        :Creer la categorie;
+        :Afficher "Categorie creee";
+    endif
+
+case (Modifier categorie)
+    :Selectionner une categorie;
+    :Modifier nom, description ou image;
+    :Enregistrer modifications;
+    :Afficher "Categorie modifiee";
+
+case (Supprimer categorie)
+    :Selectionner une categorie;
+    :Compter les produits associes;
+    
+    if (Produits associes > 0 ?) then (oui)
+        :Afficher "Deplacez les produits d'abord";
+    else (non)
+        :Confirmer suppression;
+        :Supprimer la categorie;
+        :Afficher "Categorie supprimee";
+    endif
+
+endswitch
+
+stop
+
+@enduml

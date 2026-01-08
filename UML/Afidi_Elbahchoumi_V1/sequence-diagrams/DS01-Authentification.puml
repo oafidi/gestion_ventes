@@ -1,0 +1,84 @@
+@startuml DS01 - Authentification
+
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam sequenceMessageAlign center
+
+title DS01 - Authentification Utilisateur
+
+actor Utilisateur as U
+boundary "<<boundary>>\nLoginPage" as LP
+control "<<control>>\nAuthController" as AC
+entity "<<entity>>\nUtilisateur" as UE
+
+== Inscription ==
+
+U -> LP : demanderInscription()
+activate LP
+LP --> U : afficherFormulaire()
+deactivate LP
+
+U -> LP : soumettreInscription(nom, email, motDePasse, role)
+activate LP
+LP -> AC : inscrire(nom, email, motDePasse, role)
+activate AC
+AC -> UE : findByEmail(email)
+activate UE
+
+alt email existe
+    UE --> AC : utilisateur
+    AC --> LP : erreur("Email deja utilise")
+    LP --> U : afficherErreur("Email deja utilise")
+else email disponible
+    UE --> AC : null
+    deactivate UE
+    AC -> UE : save(nouvelUtilisateur)
+    activate UE
+    UE --> AC : utilisateurCree
+    deactivate UE
+    AC --> LP : succes(utilisateurCree)
+    deactivate AC
+    LP --> U : afficherConfirmation()
+    deactivate LP
+end
+
+== Connexion ==
+
+U -> LP : saisirIdentifiants(email, motDePasse)
+activate LP
+LP -> AC : authentifier(email, motDePasse)
+activate AC
+AC -> UE : findByEmail(email)
+activate UE
+UE --> AC : utilisateur
+deactivate UE
+
+alt identifiants invalides
+    AC --> LP : erreur("Identifiants incorrects")
+    LP --> U : afficherErreur("Identifiants incorrects")
+else authentification reussie
+    AC --> LP : succes(utilisateur, token)
+    deactivate AC
+    
+    alt role = ADMIN
+        LP --> U : redirigerVers("/admin/dashboard")
+    else role = VENDEUR
+        LP --> U : redirigerVers("/vendeur/espace")
+    else role = CLIENT
+        LP --> U : redirigerVers("/boutique")
+    end
+    deactivate LP
+end
+
+== Deconnexion ==
+
+U -> LP : deconnecter()
+activate LP
+LP -> AC : invaliderSession(token)
+activate AC
+AC --> LP : sessionTerminee
+deactivate AC
+LP --> U : redirigerVers("/accueil")
+deactivate LP
+
+@enduml

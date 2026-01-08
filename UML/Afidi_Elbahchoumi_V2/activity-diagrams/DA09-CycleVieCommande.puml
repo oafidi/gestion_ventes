@@ -1,0 +1,39 @@
+@startuml DA09 - Cycle Vie Commande
+
+title DA09 - Cycle de Vie d'une Commande (Cash on Delivery)
+
+start
+
+:Client passe une commande;
+:Statut = EN_ATTENTE;
+:Stock reserve;
+:Email confirmation envoye;
+
+:Admin appelle le client pour confirmer;
+
+if (Client confirme par telephone ?) then (oui)
+    :Statut = CONFIRMEE;
+    :Preparer la commande;
+    :Statut = EN_LIVRAISON;
+    :Notifier client "Colis en route";
+    
+    :Livreur arrive chez le client;
+    
+    if (Client disponible et accepte ?) then (oui)
+        :Client paie en especes;
+        :Statut = LIVREE;
+        :Commande terminee avec succes;
+    else (non)
+        :Client absent ou refuse;
+        :Statut = ANNULEE;
+        :Restaurer le stock;
+    endif
+else (non)
+    :Client ne confirme pas;
+    :Statut = ANNULEE;
+    :Restaurer le stock;
+endif
+
+stop
+
+@enduml

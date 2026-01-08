@@ -1,0 +1,169 @@
+@startuml DiagrammeDeClasses
+
+title Diagramme de Classes - Gestion des Ventes
+
+skinparam classAttributeIconSize 0
+skinparam style strictuml
+
+' ============================================
+' CLASSES UTILISATEURS (Heritage)
+' ============================================
+
+abstract class Utilisateur {
+    -id : int
+    -nom : String
+    -email : String
+    -motDePasse : String
+    -telephone : String
+    -role : String
+    +sAuthentifier()
+    +recevoirAlerte()
+    +modifierProfil()
+}
+
+class Client {
+    -adresse : String
+    +consulterProduit()
+    +ajouterAvis()
+    +ajouterAuPanier()
+    +passerCommande()
+    +supprimerDuPanier()
+    +viderPanier()
+}
+
+class Admin {
+    +listerVendeurs()
+    +approuverVendeur()
+    +rejeterVendeur()
+    +bannirVendeur()
+    +listerOffres()
+    +approuverOffre()
+    +rejeterOffre()
+    +voirCommandes()
+    +gererCategories()
+    +consulterStatistiques()
+}
+
+class Vendeur {
+    -estApprouve : boolean
+    +inscrireProduit()
+    +listerMesOffres()
+    +modifierOffre()
+    +supprimerOffre()
+    +masquerAvis()
+    +consulterStatistiques()
+}
+
+Utilisateur <|-- Client
+Utilisateur <|-- Admin
+Utilisateur <|-- Vendeur
+
+' ============================================
+' CLASSE ALERTE
+' ============================================
+
+class Alerte {
+    -id : int
+    -titre : String
+    -message : String
+    -dateEnvoi : Date
+    -type : String
+    -estLue : boolean
+    +envoyerAlerte()
+    +marquerCommeLue()
+}
+
+Utilisateur "1" -- "0..*" Alerte : recoit >
+
+' ============================================
+' CLASSES CATALOGUE
+' ============================================
+
+class Categorie {
+    -id : int
+    -nom : String
+    -image : String
+}
+
+class Produit {
+    -id : int
+    -nom : String
+    -description : String
+    -prixBase : double
+    -quantite : int
+    -image : String
+    -dateDernierStock : Date
+}
+
+class OffreProduit {
+    -id : int
+    -prixVendeur : double
+    -titre : String
+    -description : String
+    -image : String
+    -estApprouve : boolean
+}
+
+Categorie "1" -- "0..*" Produit : contient >
+Produit "1" -- "0..*" OffreProduit : propose >
+Vendeur "1" -- "0..*" OffreProduit : commercialise >
+
+' ============================================
+' CLASSES PANIER
+' ============================================
+
+class Panier {
+    -id : int
+    +calculerTotal()
+}
+
+class LignePanier {
+    -id : int
+    -quantite : int
+    -prixUnitaire : double
+}
+
+Client "1" -- "1" Panier : possede >
+Panier "1" -- "0..*" LignePanier : contient >
+LignePanier "0..*" -- "1" OffreProduit : concerne >
+
+' ============================================
+' CLASSES COMMANDE
+' ============================================
+
+class Commande {
+    -id : int
+    -montantTotal : double
+    -statut : String
+    -dateCommande : Date
+    -adresseLivraison : String
+}
+
+class LigneCommande {
+    -id : int
+    -quantite : int
+    -prixUnitaire : double
+    -sousTotal : double
+}
+
+Client "1" -- "0..*" Commande : passe >
+Commande "1" -- "1..*" LigneCommande : contient >
+LigneCommande "0..*" -- "1" OffreProduit : concerne >
+
+' ============================================
+' CLASSE AVIS
+' ============================================
+
+class Avis {
+    -id : int
+    -note : int
+    -commentaire : String
+    -dateAvis : Date
+    -estPositif : boolean
+    -estCache : boolean
+}
+
+Client "1" -- "0..*" Avis : redige >
+Avis "0..*" -- "1" OffreProduit : concerne >
+
+@enduml

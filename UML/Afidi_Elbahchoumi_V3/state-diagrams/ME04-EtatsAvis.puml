@@ -1,0 +1,26 @@
+@startuml ME04 - Etats Avis
+
+title ME04 - Machine a Etats : Avis Client
+
+[*] --> PUBLIE : Client soumet avis
+
+state PUBLIE {
+    PUBLIE : entry / estCache = false
+    PUBLIE : entry / recalculer note moyenne
+    PUBLIE : entry / notifier vendeur
+    PUBLIE : do / afficher avis publiquement
+    PUBLIE : exit / sauvegarder etat
+}
+
+PUBLIE --> MASQUE : Vendeur masque avis
+
+state MASQUE {
+    MASQUE : entry / estCache = true
+    MASQUE : do / masquer avis publiquement
+    MASQUE : do / conserver en base de donnees
+    MASQUE : exit / recalculer note moyenne
+}
+
+MASQUE --> PUBLIE : Admin restaure avis
+
+@enduml

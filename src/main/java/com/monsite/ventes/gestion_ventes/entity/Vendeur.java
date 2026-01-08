@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,8 @@ import java.util.List;
 @Entity
 @Table(name = "vendeurs")
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = {"vendeurProduits"})
+@ToString(exclude = {"vendeurProduits"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class Vendeur extends Utilisateur {

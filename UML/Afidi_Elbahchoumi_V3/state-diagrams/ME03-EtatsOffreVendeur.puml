@@ -1,0 +1,33 @@
+@startuml ME03 - Etats Offre Vendeur
+
+title ME03 - Machine a Etats : Offre Vendeur (VendeurProduit)
+
+[*] --> EN_ATTENTE : Vendeur soumet offre
+
+state EN_ATTENTE {
+    EN_ATTENTE : entry / estApprouve = false
+    EN_ATTENTE : entry / notifier admin
+    EN_ATTENTE : do / masquer offre en boutique
+    EN_ATTENTE : exit / enregistrer decision admin
+}
+
+EN_ATTENTE --> APPROUVEE : Admin approuve
+EN_ATTENTE --> REJETEE : Admin rejette
+
+state APPROUVEE {
+    APPROUVEE : entry / estApprouve = true
+    APPROUVEE : entry / notifier vendeur
+    APPROUVEE : do / afficher offre en boutique
+    APPROUVEE : exit / masquer offre temporairement
+}
+
+state REJETEE {
+    REJETEE : entry / notifier vendeur avec motif
+    REJETEE : do / supprimer offre
+}
+
+APPROUVEE --> EN_ATTENTE : Vendeur modifie offre
+
+REJETEE --> [*]
+
+@enduml

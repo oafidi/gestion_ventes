@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import categorieService from '../../services/categorieService';
+import ConfirmModal from '../../components/ConfirmModal';
+import { BACKEND_URL } from '../../config/apiConfig';
 import './Categories.css';
-
-const API_BASE_URL = 'http://localhost:8080';
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -15,6 +15,10 @@ const Categories = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const fileInputRef = useRef(null);
+  
+  // États pour la modale de confirmation
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [categorieToDelete, setCategorieToDelete] = useState(null);
 
   // Charger les catégories
   const fetchCategories = async () => {
@@ -49,7 +53,7 @@ const Categories = () => {
     setEditingCategorie(categorie);
     setFormData({ nom: categorie.nom });
     setImageFile(null);
-    setImagePreview(categorie.image ? `${API_BASE_URL}${categorie.image}` : null);
+    setImagePreview(categorie.image ? `${BACKEND_URL}${categorie.image}` : null);
     setShowModal(true);
   };
 
@@ -76,16 +80,23 @@ const Categories = () => {
   };
 
   // Supprimer une catégorie
-  const handleDelete = async (id) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
+  const handleDelete = (id) => {
+    setCategorieToDelete(id);
+    setShowConfirmModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (categorieToDelete) {
       try {
-        await categorieService.deleteCategorie(id);
+        await categorieService.deleteCategorie(categorieToDelete);
         fetchCategories();
       } catch (err) {
         setError('Erreur lors de la suppression');
         console.error(err);
       }
     }
+    setShowConfirmModal(false);
+    setCategorieToDelete(null);
   };
 
   // Soumettre le formulaire
@@ -125,7 +136,7 @@ const Categories = () => {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
     if (imagePath.startsWith('http')) return imagePath;
-    return `${API_BASE_URL}${imagePath}`;
+    return `${BACKEND_URL}${imagePath}`;
   };
 
   if (loading) {
@@ -294,6 +305,16 @@ const Categories = () => {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={confirmDelete}
+        title="Supprimer la catégorie"
+        message="Êtes-vous sûr de vouloir supprimer cette catégorie ? Cette action est irréversible."
+        confirmText="Supprimer"
+        type="danger"
+      />
     </div>
   );
 };

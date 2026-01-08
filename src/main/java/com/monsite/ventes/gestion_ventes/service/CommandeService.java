@@ -7,6 +7,7 @@ import com.monsite.ventes.gestion_ventes.dto.VendeurProduitResponse;
 import com.monsite.ventes.gestion_ventes.entity.*;
 import com.monsite.ventes.gestion_ventes.repository.ClientRepository;
 import com.monsite.ventes.gestion_ventes.repository.CommandeRepository;
+import com.monsite.ventes.gestion_ventes.repository.PanierRepository;
 import com.monsite.ventes.gestion_ventes.repository.VendeurProduitRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +28,16 @@ public class CommandeService {
     private final CommandeRepository commandeRepository;
     private final VendeurProduitRepository vendeurProduitRepository;
     private final ClientRepository clientRepository;
+    private final PanierRepository panierRepository;
 
     public CommandeService(CommandeRepository commandeRepository,
                           VendeurProduitRepository vendeurProduitRepository,
-                          ClientRepository clientRepository) {
+                          ClientRepository clientRepository,
+                          PanierRepository panierRepository) {
         this.commandeRepository = commandeRepository;
         this.vendeurProduitRepository = vendeurProduitRepository;
         this.clientRepository = clientRepository;
+        this.panierRepository = panierRepository;
     }
 
     @Transactional
@@ -116,6 +120,13 @@ public class CommandeService {
         logger.info("Sauvegarde de la commande avec montant total: {}", montantTotal);
         Commande savedCommande = commandeRepository.save(commande);
         logger.info("Commande sauvegardée avec succès, ID: {}", savedCommande.getId());
+
+        // Vider le panier du client après la commande
+        panierRepository.findByClientId(clientId).ifPresent(panier -> {
+            panier.vider();
+            panierRepository.save(panier);
+            logger.info("Panier du client {} vidé après la commande", clientId);
+        });
 
         // Recharger la commande avec toutes ses relations pour éviter les problèmes de Lazy Loading
         Commande commandeWithDetails = commandeRepository.findByIdWithDetails(savedCommande.getId())

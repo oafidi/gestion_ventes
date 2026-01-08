@@ -529,10 +529,10 @@ const ChartEmptyState = ({ message }) => (
 // ==================== UTILITAIRES ====================
 
 const formatMoney = (value) => {
-  if (value === null || value === undefined) return '0 €';
-  return new Intl.NumberFormat('fr-FR', {
+  if (value === null || value === undefined) return '0 DH';
+  return new Intl.NumberFormat('fr-MA', {
     style: 'currency',
-    currency: 'EUR',
+    currency: 'MAD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(value);

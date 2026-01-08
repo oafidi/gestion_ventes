@@ -57,6 +57,7 @@ import {
 
 import { getAllCategories } from '../../services/categorieService';
 import { getAllVendeurs } from '../../services/vendeurService';
+import { BACKEND_URL } from '../../config/apiConfig';
 
 import './AnalyticsDashboard.css';
 
@@ -273,7 +274,7 @@ const AdminAnalyticsDashboard = () => {
         render: (value, row) => (
           <div className="product-cell">
             <img 
-              src={row.image ? (row.image.startsWith('/uploads') ? `http://localhost:8080${row.image}` : `http://localhost:8080/uploads/vendeur-produits/${row.image}`) : '/placeholder.png'} 
+              src={row.image ? (row.image.startsWith('/uploads') ? `\`\$\{BACKEND_URL\}${row.image}` : `\`\$\{BACKEND_URL\}/uploads/vendeur-produits/${row.image}`) : '/placeholder.png'} 
               alt={value}
               className="product-thumb"
             />

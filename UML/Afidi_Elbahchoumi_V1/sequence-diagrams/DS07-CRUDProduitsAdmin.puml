@@ -1,0 +1,122 @@
+@startuml DS07 - CRUD Produits Admin
+
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam sequenceMessageAlign center
+
+title DS07 - Gestion du Catalogue Produits
+
+actor Admin as A
+boundary "<<boundary>>\nProduitsPage" as PP
+control "<<control>>\nProduitController" as PC
+entity "<<entity>>\nProduit" as P
+entity "<<entity>>\nCategorie" as CAT
+
+== Lister les Produits ==
+
+A -> PP : listerProduits()
+activate PP
+PP -> PC : getAllProduits()
+activate PC
+PC -> P : findAll()
+activate P
+P --> PC : listeProduits
+deactivate P
+PC --> PP : listeProduits
+deactivate PC
+PP --> A : afficherTableauProduits(listeProduits)
+deactivate PP
+
+== Creer un Produit ==
+
+A -> PP : nouveauProduit()
+activate PP
+PP -> PC : getCategories()
+activate PC
+PC -> CAT : findAll()
+activate CAT
+CAT --> PC : listeCategories
+deactivate CAT
+PC --> PP : listeCategories
+deactivate PC
+PP --> A : afficherFormulaire(listeCategories)
+deactivate PP
+
+A -> PP : enregistrerProduit(nom, description, prix, categorieId, image)
+activate PP
+PP -> PC : creerProduit(nom, description, prix, categorieId, image)
+activate PC
+PC -> CAT : findById(categorieId)
+activate CAT
+CAT --> PC : categorie
+deactivate CAT
+PC -> P : create(nom, description, prix, categorie, image)
+activate P
+P --> PC : nouveauProduit
+deactivate P
+PC -> P : save(produit)
+activate P
+P --> PC : produitSauvegarde
+deactivate P
+PC --> PP : succes(produit)
+deactivate PC
+PP --> A : afficherConfirmation("Produit cree")
+deactivate PP
+
+== Modifier un Produit ==
+
+A -> PP : modifierProduit(produitId)
+activate PP
+PP -> PC : getProduit(produitId)
+activate PC
+PC -> P : findById(produitId)
+activate P
+P --> PC : produit
+deactivate P
+PC --> PP : produit
+deactivate PC
+PP --> A : afficherFormulaireModification(produit)
+deactivate PP
+
+A -> PP : enregistrerModifications(produitId, donnees)
+activate PP
+PP -> PC : updateProduit(produitId, donnees)
+activate PC
+PC -> P : findById(produitId)
+activate P
+P --> PC : produit
+deactivate P
+PC -> P : update(produit, donnees)
+activate P
+P --> PC : produitModifie
+deactivate P
+PC -> P : save(produit)
+activate P
+P --> PC : produitSauvegarde
+deactivate P
+PC --> PP : succes(produit)
+deactivate PC
+PP --> A : afficherConfirmation("Produit modifie")
+deactivate PP
+
+== Supprimer un Produit ==
+
+A -> PP : supprimerProduit(produitId)
+activate PP
+PP --> A : demanderConfirmation()
+deactivate PP
+
+A -> PP : confirmerSuppression(produitId)
+activate PP
+PP -> PC : deleteProduit(produitId)
+activate PC
+PC -> P : delete(produitId)
+activate P
+P --> PC : produitSupprime
+deactivate P
+PC --> PP : succes
+deactivate PC
+PP --> A : afficherConfirmation("Produit supprime")
+deactivate PP
+
+@enduml

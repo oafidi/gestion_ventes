@@ -1,0 +1,70 @@
+@startuml UC01 - Gestion Produits et Categories
+
+left to right direction
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam shadowing false
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+
+skinparam actor {
+    BackgroundColor White
+    BorderColor Black
+}
+
+skinparam usecase {
+    BackgroundColor White
+    BorderColor Black
+    BorderThickness 1
+}
+
+skinparam rectangle {
+    BackgroundColor White
+    BorderColor Black
+    BorderThickness 2
+}
+
+title <b>Diagramme de Cas d'Utilisation</b>\nGestion des Produits et Categories
+
+actor Admin as A
+
+rectangle "Gestion des Produits et Categories" {
+    (Lister les categories) as UC1
+    (Ajouter une categorie) as UC2
+    (Modifier une categorie) as UC3
+    (Supprimer une categorie) as UC4
+    (Rechercher une categorie) as UC5
+    
+    (Lister les produits) as UC6
+    (Ajouter un produit) as UC7
+    (Modifier un produit) as UC8
+    (Supprimer un produit) as UC9
+    (Rechercher un produit) as UC10
+    (Filtrer par categorie) as UC11
+    (Gerer le stock) as UC12
+    (Assigner a une categorie) as UC13
+}
+
+' Associations Acteur - Cas d'utilisation
+A -- UC1
+A -- UC2
+A -- UC3
+A -- UC4
+
+A -- UC6
+A -- UC7
+A -- UC8
+A -- UC9
+A -- UC12
+
+' Relations Extend
+UC1 <.. UC5 : <<extend>>
+UC6 <.. UC10 : <<extend>>
+UC6 <.. UC11 : <<extend>>
+
+' Relations Include
+UC7 ..> UC13 : <<include>>
+UC8 ..> UC13 : <<include>>
+
+@enduml

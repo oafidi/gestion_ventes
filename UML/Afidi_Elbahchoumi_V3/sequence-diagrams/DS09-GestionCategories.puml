@@ -1,0 +1,132 @@
+@startuml DS09 - Gestion Categories
+
+skinparam style strictuml
+skinparam backgroundColor White
+skinparam sequenceMessageAlign center
+
+title DS09 - Gestion des Categories
+
+actor Admin as A
+boundary "<<boundary>>\nCategoriesPage" as CP
+control "<<control>>\nCategorieController" as CC
+entity "<<entity>>\nCategorie" as CAT
+entity "<<entity>>\nProduit" as P
+
+== Lister les Categories ==
+
+A -> CP : listerCategories()
+activate CP
+CP -> CC : getAllCategories()
+activate CC
+CC -> CAT : findAllWithProductCount()
+activate CAT
+CAT --> CC : listeCategories
+deactivate CAT
+CC --> CP : listeCategories
+deactivate CC
+CP --> A : afficherTableauCategories(listeCategories)
+deactivate CP
+
+== Creer une Categorie ==
+
+A -> CP : nouvelleCategorie()
+activate CP
+CP --> A : afficherFormulaire()
+deactivate CP
+
+A -> CP : enregistrerCategorie(nom, description, image)
+activate CP
+CP -> CC : creerCategorie(nom, description, image)
+activate CC
+CC -> CAT : findByNom(nom)
+activate CAT
+CAT --> CC : categorieExistante
+deactivate CAT
+
+alt nom existe deja
+    CC --> CP : erreur("Nom deja utilise")
+    CP --> A : afficherErreur("Ce nom existe deja")
+else nom unique
+    CC -> CAT : create(nom, description, image)
+    activate CAT
+    CAT --> CC : nouvelleCategorie
+    deactivate CAT
+    CC -> CAT : save(categorie)
+    activate CAT
+    CAT --> CC : categorieSauvegardee
+    deactivate CAT
+    CC --> CP : succes(categorie)
+    deactivate CC
+    CP --> A : afficherConfirmation("Categorie creee")
+    deactivate CP
+end
+
+== Modifier une Categorie ==
+
+A -> CP : modifierCategorie(categorieId)
+activate CP
+CP -> CC : getCategorie(categorieId)
+activate CC
+CC -> CAT : findById(categorieId)
+activate CAT
+CAT --> CC : categorie
+deactivate CAT
+CC --> CP : categorie
+deactivate CC
+CP --> A : afficherFormulaireModification(categorie)
+deactivate CP
+
+A -> CP : enregistrerModifications(categorieId, donnees)
+activate CP
+CP -> CC : updateCategorie(categorieId, donnees)
+activate CC
+CC -> CAT : update(categorieId, donnees)
+activate CAT
+CAT --> CC : categorieModifiee
+deactivate CAT
+CC -> CAT : save(categorie)
+activate CAT
+CAT --> CC : categorieSauvegardee
+deactivate CAT
+CC --> CP : succes(categorie)
+deactivate CC
+CP --> A : afficherConfirmation("Categorie modifiee")
+deactivate CP
+
+== Supprimer une Categorie ==
+
+A -> CP : supprimerCategorie(categorieId)
+activate CP
+CP -> CC : verifierSuppression(categorieId)
+activate CC
+CC -> P : countByCategorieId(categorieId)
+activate P
+P --> CC : nombreProduits
+deactivate P
+
+alt nombreProduits > 0
+    CC --> CP : erreur("Categorie non vide")
+    deactivate CC
+    CP --> A : afficherErreur("Deplacez les produits d'abord")
+    deactivate CP
+else categorie vide
+    CC --> CP : suppressionPossible
+    deactivate CC
+    CP --> A : demanderConfirmation()
+    deactivate CP
+    
+    A -> CP : confirmerSuppression(categorieId)
+    activate CP
+    CP -> CC : deleteCategorie(categorieId)
+    activate CC
+    CC -> CAT : delete(categorieId)
+    activate CAT
+    CAT --> CC : categorieSupprimee
+    deactivate CAT
+    CC --> CP : succes
+    deactivate CC
+    CP --> A : afficherConfirmation("Categorie supprimee")
+    deactivate CP
+end
+
+@enduml

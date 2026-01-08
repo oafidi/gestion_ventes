@@ -200,4 +200,12 @@ public class VendeurProduitService {
                 .quantiteStock(vp.getProduit().getQuantite())
                 .build();
     }
+
+    /**
+     * Met à jour le profil du vendeur
+     */
+    @Transactional
+    public void updateVendeurProfil(Vendeur vendeur) {
+        vendeurRepository.save(vendeur);
+    }
 }

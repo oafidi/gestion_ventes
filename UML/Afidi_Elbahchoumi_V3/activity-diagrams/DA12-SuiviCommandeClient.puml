@@ -1,0 +1,38 @@
+@startuml DA12 - Suivi Commande Client
+
+title DA12 - Suivi de Commande par le Client
+
+start
+
+:Se connecter a son compte;
+:Acceder a "Mes commandes";
+:Afficher historique des commandes;
+:Selectionner une commande;
+:Afficher details de la commande;
+
+switch (Action ?)
+
+case (Suivre livraison)
+    :Afficher tracking en temps reel;
+    :Consulter position du colis;
+
+case (Demander annulation)
+    :Verifier le statut actuel;
+    
+    if (Statut = EN_ATTENTE ou CONFIRMEE ?) then (oui)
+        :Confirmer annulation;
+        :Statut = ANNULEE;
+        :Restaurer le stock;
+        :Afficher "Commande annulee";
+    else (non)
+        :Afficher "Annulation impossible";
+        :Contacter service client;
+    endif
+
+
+
+endswitch
+
+stop
+
+@enduml

@@ -4,13 +4,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "avis")
 @Data
+@EqualsAndHashCode(exclude = {"client", "vendeurProduit"})
+@ToString(exclude = {"client", "vendeurProduit"})
 @NoArgsConstructor
 @AllArgsConstructor
 public class Avis {

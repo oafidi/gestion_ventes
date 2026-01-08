@@ -11,8 +11,14 @@ const getBackendUrl = () => {
   return `http://${hostname}:8080`;
 };
 
+const getAIServiceUrl = () => {
+  // Service AI Python FastAPI
+  return 'http://127.0.0.1:8000';
+};
+
 export const BACKEND_URL = getBackendUrl();
 export const API_URL = `${BACKEND_URL}/api`;
+export const AI_SERVICE_URL = getAIServiceUrl();
 
 // Helper pour construire les URLs d'images
 export const getImageUrl = (imagePath) => {

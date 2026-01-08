@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_URL } from '../config/apiConfig';
+import { API_URL, AI_SERVICE_URL } from '../config/apiConfig';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -7,6 +7,14 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true, // Envoyer les cookies avec les requêtes
+});
+
+// API pour le service AI (recherche sémantique)
+const aiApi = axios.create({
+  baseURL: AI_SERVICE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 // Intercepteur pour ajouter le token aux requêtes (optionnel pour le store)
@@ -167,6 +175,110 @@ const storeService = {
   getProfil: async () => {
     const response = await api.get('/client/profil');
     return response.data;
+  },
+
+  // ========== Recherche Sémantique AI ==========
+
+  // Recherche sémantique de produits avec langage naturel
+  rechercheSemantiqueTexte: async (query) => {
+    try {
+      const response = await aiApi.post('/products/get_products_text', { query });
+      return response.data; // { ids: [id1, id2, ...] }
+    } catch (error) {
+      console.error('Erreur recherche sémantique:', error);
+      return { ids: [] };
+    }
+  },
+
+  // Convertir une URL d'image locale en chemin WSL pour le service AI Linux
+  convertToWSLPath: (imageUrl) => {
+    // Chemin de base WSL du projet
+    const wslBasePath = '/mnt/c/Users/omar1/Downloads/gestion-ventes/gestion-ventes';
+    
+    // Si c'est une URL locale du serveur (http://localhost:8080/uploads/...)
+    if (imageUrl.includes('localhost:8080/uploads/') || imageUrl.includes('127.0.0.1:8080/uploads/')) {
+      const uploadPath = imageUrl.split('/uploads/')[1];
+      return `${wslBasePath}/uploads/${uploadPath}`;
+    }
+    
+    // Si c'est un chemin relatif (/uploads/...)
+    if (imageUrl.startsWith('/uploads/')) {
+      return `${wslBasePath}${imageUrl}`;
+    }
+    
+    // Sinon retourner tel quel (URL externe)
+    return imageUrl;
+  },
+
+  // Recherche sémantique par image
+  rechercheSemantiqueImage: async (imageUrl) => {
+    try {
+      // Convertir l'URL en chemin WSL si c'est une image locale
+      const wslPath = storeService.convertToWSLPath(imageUrl);
+      console.log('Recherche par image - URL originale:', imageUrl);
+      console.log('Recherche par image - Chemin WSL:', wslPath);
+      
+      const response = await aiApi.post('/products/get_products_image', { query: wslPath });
+      return response.data; // { ids: [id1, id2, ...] }
+    } catch (error) {
+      console.error('Erreur recherche par image:', error);
+      return { ids: [] };
+    }
+  },
+
+  // Recherche sémantique et récupération des produits complets
+  rechercheSemantiqueComplete: async (query) => {
+    try {
+      // 1. Obtenir les IDs depuis le service AI
+      const aiResponse = await aiApi.post('/products/get_products_text', { query });
+      const productIds = aiResponse.data.ids || [];
+      
+      if (productIds.length === 0) {
+        return [];
+      }
+
+      // 2. Récupérer les détails des produits depuis le backend Spring
+      const allProducts = await api.get('/vendeur-produits/approuves');
+      
+      // 3. Filtrer pour ne garder que les produits trouvés par l'AI
+      const foundProducts = allProducts.data.filter(product => 
+        productIds.includes(String(product.id))
+      );
+
+      // 4. Trier selon l'ordre de pertinence retourné par l'AI
+      foundProducts.sort((a, b) => {
+        return productIds.indexOf(String(a.id)) - productIds.indexOf(String(b.id));
+      });
+
+      return foundProducts;
+    } catch (error) {
+      console.error('Erreur recherche sémantique complète:', error);
+      return [];
+    }
+  },
+
+  // ========== Recommandations ==========
+
+  // Vérifier si le client a des commandes
+  hasOrders: async () => {
+    try {
+      const response = await api.get('/client/has-orders');
+      return response.data;
+    } catch (error) {
+      console.error('Erreur vérification commandes:', error);
+      return false;
+    }
+  },
+
+  // Récupérer les produits recommandés pour le client connecté
+  getRecommendations: async (maxSimilarClients = 3) => {
+    try {
+      const response = await api.get(`/client/recommendations?maxSimilarClients=${maxSimilarClients}`);
+      return response.data;
+    } catch (error) {
+      console.error('Erreur récupération recommandations:', error);
+      return [];
+    }
   },
 };
 

@@ -81,6 +81,9 @@ const StoreShop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart, getCartCount } = useCart();
   const [cartOpen, setCartOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSemanticResults, setShowSemanticResults] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -135,6 +138,81 @@ const StoreShop = () => {
     }
   };
 
+  // Recherche sémantique avec l'AI
+  const handleSemanticSearch = async (query) => {
+    if (!query || query.trim().length < 2) {
+      setShowSemanticResults(false);
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const results = await storeService.rechercheSemantiqueComplete(query);
+      setSearchResults(results);
+      setShowSemanticResults(true);
+    } catch (error) {
+      console.error('Erreur recherche sémantique:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Debounce pour la recherche sémantique
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchTerm.trim().length >= 2) {
+        handleSemanticSearch(searchTerm);
+      } else {
+        setShowSemanticResults(false);
+        setSearchResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  const clearSearch = () => {
+    setSearchTerm('');
+    setShowSemanticResults(false);
+    setSearchResults([]);
+  };
+
+  // Recherche par image avec l'AI
+  const handleImageSearch = async (imageUrl) => {
+    if (!imageUrl || !imageUrl.trim()) return;
+
+    setIsSearching(true);
+    try {
+      const aiResponse = await storeService.rechercheSemantiqueImage(imageUrl);
+      const productIds = aiResponse.ids || [];
+
+      if (productIds.length === 0) {
+        setSearchResults([]);
+        setShowSemanticResults(true);
+        return;
+      }
+
+      const allProducts = await storeService.getProduitsApprouves();
+      const foundProducts = allProducts.filter(product =>
+        productIds.includes(String(product.id))
+      );
+
+      foundProducts.sort((a, b) => {
+        return productIds.indexOf(String(a.id)) - productIds.indexOf(String(b.id));
+      });
+
+      setSearchResults(foundProducts);
+      setShowSemanticResults(true);
+    } catch (error) {
+      console.error('Erreur recherche par image:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   const filteredProducts = products.filter(product => {
     const title = product.titre || product.produitNom || '';
     const matchesSearch = title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -158,6 +236,9 @@ const StoreShop = () => {
           setSearchTerm={setSearchTerm}
           cartCount={getCartCount()}
           onCartClick={() => setCartOpen(true)}
+          isSearching={isSearching}
+          onClearSearch={clearSearch}
+          onImageSearch={handleImageSearch}
         />
         <div className="store-loading">
           <div className="store-spinner"></div>
@@ -173,6 +254,9 @@ const StoreShop = () => {
         setSearchTerm={setSearchTerm}
         cartCount={getCartCount()}
         onCartClick={() => setCartOpen(true)}
+        isSearching={isSearching}
+        onClearSearch={clearSearch}
+        onImageSearch={handleImageSearch}
       />
 
       <div className="store-wrapper">
@@ -217,24 +301,44 @@ const StoreShop = () => {
             <div className="store-section-title">
               <span>
                 <FiShoppingBag className="store-section-title-icon" />
-                {selectedCategory 
-                  ? categories.find(c => c.id === selectedCategory)?.nom 
-                  : 'Tous les produits'
+                {showSemanticResults 
+                  ? 'Résultats de recherche'
+                  : selectedCategory 
+                    ? categories.find(c => c.id === selectedCategory)?.nom 
+                    : 'Tous les produits'
                 }
                 <span style={{ fontWeight: 400, fontSize: '14px', color: 'var(--store-gray-500)', marginLeft: '15px' }}>
-                  ({filteredProducts.length} produits)
+                  ({(showSemanticResults ? searchResults : filteredProducts).length} produits)
                 </span>
               </span>
+              {showSemanticResults && (
+                <button 
+                  onClick={clearSearch} 
+                  style={{ 
+                    cursor: 'pointer', 
+                    border: 'none', 
+                    background: 'rgba(255, 107, 53, 0.1)',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    color: 'var(--store-primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px'
+                  }}
+                >
+                  <FiX /> Effacer
+                </button>
+              )}
             </div>
 
-            {filteredProducts.length === 0 ? (
+            {(showSemanticResults ? searchResults : filteredProducts).length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--store-gray-500)' }}>
                 <div style={{ marginBottom: '20px' }}><FiInbox size={60} /></div>
                 <p>Aucun produit trouvé</p>
               </div>
             ) : (
               <div className="store-products-grid">
-                {filteredProducts.map(product => (
+                {(showSemanticResults ? searchResults : filteredProducts).map(product => (
                   <ProductCard 
                     key={product.id} 
                     product={product} 

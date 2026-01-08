@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import com.monsite.ventes.gestion_ventes.dto.CommandeRequest;
 import com.monsite.ventes.gestion_ventes.dto.CommandeResponse;
 import com.monsite.ventes.gestion_ventes.dto.MessageResponse;
+import com.monsite.ventes.gestion_ventes.dto.VendeurProduitResponse;
 import com.monsite.ventes.gestion_ventes.entity.*;
 import com.monsite.ventes.gestion_ventes.repository.*;
 import com.monsite.ventes.gestion_ventes.service.CommandeService;
+import com.monsite.ventes.gestion_ventes.service.RecommendationService;
 
 @RestController
 @RequestMapping("/api/client")
@@ -25,10 +27,14 @@ public class ClientController {
 
     private final ClientRepository clientRepository;
     private final CommandeService commandeService;
+    private final RecommendationService recommendationService;
 
-    public ClientController(ClientRepository clientRepository, CommandeService commandeService) {
+    public ClientController(ClientRepository clientRepository, 
+                            CommandeService commandeService,
+                            RecommendationService recommendationService) {
         this.clientRepository = clientRepository;
         this.commandeService = commandeService;
+        this.recommendationService = recommendationService;
     }
 
     @GetMapping("/debug")
@@ -140,5 +146,39 @@ public class ClientController {
                     .build()
             );
         }
+    }
+
+    // ========== Recommandations ==========
+
+    /**
+     * Vérifie si le client a déjà passé une commande.
+     */
+    @GetMapping("/has-orders")
+    public ResponseEntity<Boolean> hasOrders(@AuthenticationPrincipal Utilisateur utilisateur) {
+        boolean hasOrders = recommendationService.clientHasOrders(utilisateur.getId());
+        return ResponseEntity.ok(hasOrders);
+    }
+
+    /**
+     * Récupère les produits recommandés pour le client connecté.
+     * Ces produits sont basés sur les achats de clients similaires.
+     */
+    @GetMapping("/recommendations")
+    public ResponseEntity<List<VendeurProduitResponse>> getRecommendations(
+            @AuthenticationPrincipal Utilisateur utilisateur,
+            @RequestParam(defaultValue = "3") int maxSimilarClients) {
+        logger.info("Récupération des recommandations pour le client {}", utilisateur.getId());
+        
+        // Vérifier d'abord si le client a des commandes
+        if (!recommendationService.clientHasOrders(utilisateur.getId())) {
+            logger.info("Le client {} n'a pas encore de commandes, pas de recommandations", utilisateur.getId());
+            return ResponseEntity.ok(List.of());
+        }
+
+        List<VendeurProduitResponse> recommendations = 
+                recommendationService.getRecommendedProducts(utilisateur.getId(), maxSimilarClients);
+        
+        logger.info("Trouvé {} recommandations pour le client {}", recommendations.size(), utilisateur.getId());
+        return ResponseEntity.ok(recommendations);
     }
 }

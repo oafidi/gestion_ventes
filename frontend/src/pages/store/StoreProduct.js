@@ -34,6 +34,7 @@ const StoreProduct = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const { addToCart, getCartCount, getRemainingStock, cartItems } = useCart();
+  const [isSearching, setIsSearching] = useState(false);
 
   // États pour les avis
   const [avis, setAvis] = useState([]);
@@ -178,6 +179,17 @@ const StoreProduct = () => {
     setQuantity(1); // Reset quantity after adding
   };
 
+  // Recherche par image avec l'AI - redirige vers la boutique
+  const handleImageSearch = async (imageUrl) => {
+    if (!imageUrl || !imageUrl.trim()) return;
+    // Redirige vers la boutique avec les paramètres de recherche
+    navigate('/store/shop');
+  };
+
+  const clearSearch = () => {
+    setSearchTerm('');
+  };
+
   const handleBuyNow = () => {
     if (availableStock <= 0) return;
     addToCart({
@@ -199,6 +211,9 @@ const StoreProduct = () => {
           setSearchTerm={setSearchTerm}
           cartCount={getCartCount()}
           onCartClick={() => setCartOpen(true)}
+          isSearching={isSearching}
+          onClearSearch={clearSearch}
+          onImageSearch={handleImageSearch}
         />
         <div className="store-loading">
           <div className="store-spinner"></div>
@@ -218,6 +233,9 @@ const StoreProduct = () => {
         setSearchTerm={setSearchTerm}
         cartCount={getCartCount()}
         onCartClick={() => setCartOpen(true)}
+        isSearching={isSearching}
+        onClearSearch={clearSearch}
+        onImageSearch={handleImageSearch}
       />
 
       <div className="store-wrapper">

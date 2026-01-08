@@ -24,17 +24,20 @@ public class AdminService {
     private final CategorieRepository categorieRepository;
     private final ProduitRepository produitRepository;
     private final CommandeRepository commandeRepository;
+    private final AISearchService aiSearchService;
 
     public AdminService(VendeurRepository vendeurRepository,
                         VendeurProduitRepository vendeurProduitRepository,
                         CategorieRepository categorieRepository,
                         ProduitRepository produitRepository,
-                        CommandeRepository commandeRepository) {
+                        CommandeRepository commandeRepository,
+                        AISearchService aiSearchService) {
         this.vendeurRepository = vendeurRepository;
         this.vendeurProduitRepository = vendeurProduitRepository;
         this.categorieRepository = categorieRepository;
         this.produitRepository = produitRepository;
         this.commandeRepository = commandeRepository;
+        this.aiSearchService = aiSearchService;
     }
 
     // ========== Gestion des Vendeurs ==========
@@ -162,6 +165,9 @@ public class AdminService {
 
         vendeurProduit.setEstApprouve(true);
         vendeurProduitRepository.save(vendeurProduit);
+
+        // Synchroniser avec le service AI pour la recherche sémantique
+        aiSearchService.syncProductWithAI(vendeurProduit);
 
         return MessageResponse.builder()
                 .success(true)

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 class Product(BaseModel):
     id: int
@@ -31,3 +31,4 @@ class SearchQuery(BaseModel):
 class CollabInput(BaseModel):
     collab_filtered_data: Dict[str, List]
     client_id: int
+    k: Optional[int] = 3

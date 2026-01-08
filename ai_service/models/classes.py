@@ -37,3 +37,7 @@ class CollabInput(BaseModel):
 # Customer Support Model
 class ChatMessage(BaseModel):
     message: str
+
+# Analytics Chat Model
+class AnalyticsQuery(BaseModel):
+    query: str

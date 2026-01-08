@@ -1,9 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from models.classes import Product, SearchQuery, CollabInput, ChatMessage
+from models.classes import Product, SearchQuery, CollabInput, ChatMessage, AnalyticsQuery
 from semantic_search import get_top_products, add_or_update_product, get_top_products_by_image
 from collaborative_filtering import recommendation_system
 from customer_support import ask
+from analytics_chat import process_analytics_query, generate_natural_response
 
 app = FastAPI()
 
@@ -50,3 +51,28 @@ def ask_support(chat_message: ChatMessage):
     - sources: Liste des sources trouvées avec leur contenu
     """
     return ask(chat_message.message)
+
+# ==================== ANALYTICS CHAT ENDPOINT ====================
+
+@app.post("/analytics/chat")
+def analytics_chat(analytics_query: AnalyticsQuery):
+    """
+    Analyse les données en langage naturel.
+    Peut retourner un KPI ou des données pour un graphique.
+    
+    Request body:
+    - query: La question de l'utilisateur en langage naturel
+    
+    Response:
+    - type: "kpi" ou "chart" ou "error"
+    - chart_type: "bar", "line", "pie", "donut" (si type=chart)
+    - title: Titre de l'analyse
+    - description: Description courte
+    - data: Les données (format dépend du type)
+    - message: Réponse en langage naturel
+    - sql_query: La requête SQL exécutée
+    """
+    result = process_analytics_query(analytics_query.query)
+    natural_response = generate_natural_response(result, analytics_query.query)
+    result["message"] = natural_response
+    return result

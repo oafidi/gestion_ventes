@@ -13,6 +13,7 @@ import { Vendeurs } from '../../pages/vendeurs';
 import { Inscriptions } from '../../pages/inscriptions';
 import { CommandesList, ImportCommandes } from '../../pages/commandes';
 import { AdminAnalyticsDashboard } from '../../pages/analytics';
+import StatistiquesChat from '../../pages/dashboard/StatistiquesChat';
 import '../../styles/layout.css';
 
 // Icônes SVG modernes
@@ -164,26 +165,6 @@ const Commandes = () => (
   </>
 );
 
-const Statistiques = () => (
-  <>
-    <div className="page-header">
-      <div className="page-header-left">
-        <h1 className="page-title">Statistiques</h1>
-        <p className="page-subtitle">Analysez les performances de votre plateforme</p>
-      </div>
-    </div>
-    <div className="data-card">
-      <div className="data-card-body">
-        <div className="empty-state">
-          {Icons.barChart}
-          <h3 className="empty-state-title">Statistiques</h3>
-          <p className="empty-state-text">Les analyses seront disponibles bientôt.</p>
-        </div>
-      </div>
-    </div>
-  </>
-);
-
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
@@ -315,7 +296,7 @@ const DashboardLayout = () => {
             <Route path="/inscriptions" element={<Inscriptions />} />
             <Route path="/commandes" element={<CommandesList />} />
             <Route path="/import-commandes" element={<ImportCommandes />} />
-            <Route path="/statistiques" element={<Statistiques />} />
+            <Route path="/statistiques" element={<StatistiquesChat />} />
           </Routes>
         </div>
       </main>

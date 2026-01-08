@@ -2,3 +2,13 @@ numpy
 pandas
 chromadb
 open-clip-torch
+langchain
+langchain-openai
+mysql-connector-python
+python-dotenv
+openai
+fastapi
+uvicorn
+pydantic
+datasets
+sentence-transformers
